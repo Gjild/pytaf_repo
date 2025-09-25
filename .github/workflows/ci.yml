@@ -1,0 +1,90 @@
+name: ci
+on: [push, pull_request]
+env:
+  TZ: UTC
+  LC_ALL: C.UTF-8
+  LANG: C.UTF-8
+
+jobs:
+  linux:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - uses: astral-sh/setup-uv@v6
+
+      - name: Setup uv env and lock
+        run: |
+          uv python install 3.11.9
+          uv venv -p 3.11 .venv
+          source .venv/bin/activate
+          uv lock
+
+      - name: Guard uv.lock must be committed (no drift)
+        run: |
+          git diff --quiet -- uv.lock || { git --no-pager diff -U0 -- uv.lock; echo "uv.lock changed; commit it"; exit 1; }
+
+      - name: Dev install from lock & parity sanity
+        run: |
+          source .venv/bin/activate
+          uv sync --group dev --locked
+
+      - name: Lint, typecheck, tests
+        run: |
+          source .venv/bin/activate
+          uv run ruff check .
+          uv run ruff format --check .
+          uv run mypy src
+          uv run pytest -q
+
+      - name: CLI smoke
+        run: |
+          source .venv/bin/activate
+          uv run pytaf --help
+          uv run pytaf init --non-interactive
+
+  windows:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - uses: astral-sh/setup-uv@v6
+
+      - name: Setup uv env and lock
+        shell: pwsh
+        run: |
+          uv python install 3.11.9
+          uv venv -p 3.11 .venv
+          . .\.venv\Scripts\Activate.ps1
+          uv lock
+
+      - name: Guard uv.lock must be committed (no drift)
+        shell: pwsh
+        run: |
+          git diff --quiet -- uv.lock; if ($LASTEXITCODE -ne 0) { git --no-pager diff -U0 -- uv.lock; Write-Host "uv.lock changed; commit it"; exit 1 }
+
+      - name: Dev install from lock
+        shell: pwsh
+        run: |
+          . .\.venv\Scripts\Activate.ps1
+          uv sync --group dev --locked
+
+      - name: Lint, typecheck, tests
+        shell: pwsh
+        run: |
+          . .\.venv\Scripts\Activate.ps1
+          uv run ruff check .
+          uv run ruff format --check .
+          uv run mypy src
+          uv run pytest -q
+
+      - name: CLI smoke
+        shell: pwsh
+        run: |
+          . .\.venv\Scripts\Activate.ps1
+          uv run pytaf --help
+          uv run pytaf init --non-interactive

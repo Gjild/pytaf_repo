@@ -1,0 +1,1 @@
+pytaf.txt details the overall vision for the project and implementaion phases, but phase{n}.txt (where {n} is 0, 1, 2,...) are based on real implementation and any conflict between them and pytaf.txt, phase{n}.txt wins.

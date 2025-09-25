@@ -1,0 +1,102 @@
+[build-system]
+requires = ["hatchling>=1.25.0"]
+build-backend = "hatchling.build"
+
+[project]
+name = "pytaf"
+version = "0.0.0a1"
+description = "PyTAF — Hardened Core v1 (Phase 0 bootstrap)"
+readme = "README.md"
+requires-python = "==3.11.*"
+license = "MIT"
+authors = [{ name = "RF Automation Team" }]
+
+# Runtime dependencies (VISA-free in Phase 0)
+dependencies = [
+  "typer>=0.12.0",
+  "click>=8.1.0",
+  "rich>=13.7.0",
+  "tomli-w>=1.0.0",
+  "platformdirs>=4.2.0",
+]
+
+# Optional but recommended metadata for future governance
+[project.urls]
+Homepage = "https://github.com/<org>/pytaf"
+Issues    = "https://github.com/<org>/pytaf/issues"
+
+[project.optional-dependencies]
+# Keep this in parity with [dependency-groups].dev (guarded by a parity script)
+dev = [
+  "pytest>=8.2.0",
+  "pytest-xdist>=3.5.0",
+  "pytest-randomly>=3.15.0",
+  "coverage>=7.6.0",
+  "ruff>=0.6.9",
+  "mypy>=1.11.2",
+  "nox>=2024.4.15",
+  "pre-commit>=3.7.0",
+  "hatchling>=1.25.0",
+  "editables>=0.5",
+]
+
+[dependency-groups]
+# uv-native group; used by `uv sync --group dev --locked`
+dev = [
+  "pytest>=8.2.0",
+  "pytest-xdist>=3.5.0",
+  "pytest-randomly>=3.15.0",
+  "coverage>=7.6.0",
+  "ruff>=0.6.9",
+  "mypy>=1.11.2",
+  "nox>=2024.4.15",
+  "pre-commit>=3.7.0",
+  "hatchling>=1.25.0",
+  "editables>=0.5",
+]
+
+[project.scripts]
+# Must target a callable function
+pytaf = "pytaf.cli.main:main"
+
+[tool.uv]
+# Lock only for CPython 3.11 on Windows/Linux to keep the lock deterministic
+environments = ["python_version == '3.11' and (sys_platform == 'win32' or sys_platform == 'linux')"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E","F","I","UP","B","PIE","A","SIM"]
+
+[tool.ruff.format]
+quote-style = "double"
+
+[tool.pytest.ini_options]
+addopts = "-q --randomly-seed=12345"
+testpaths = ["tests"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+warn_unused_ignores = true
+warn_redundant_casts = true
+warn_unreachable = true
+mypy_path = ["src"]
+ignore_missing_imports = true
+
+# Hatch src-layout: declare sources and package name
+[tool.hatch.build]
+include = ["LICENSE"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/pytaf"]
+
+[tool.hatch.build.targets.sdist]
+include = [
+  "src/pytaf",
+  "pyproject.toml",
+  "README.md",
+  "LICENSE",
+]

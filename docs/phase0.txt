@@ -1,0 +1,784 @@
+# PyTAF — Phase 0 (Bootstrap, Echo Transport, Repo Skeleton)
+
+**uv-managed, online-first, no wheelhouse/offline flows**
+
+The objective for Phase 0 is a **clone-and-run** Python repo that uses **uv** for interpreter provisioning, locking, installation, execution, building, linting, type-checking, and testing. It exposes a minimal **CLI** (`pytaf init`), a VISA-free **echo transport** behind a typed SPI, and CI that guards lock drift and code quality.
+
+This document is **stand-alone**, precise, and online-first: all steps rely on `uv` and the Python Package Index. There is **no** wheelhouse, `pip download`, or any other offline packaging procedure.
+
+---
+
+## 0) Scope and hard requirements
+
+* **Operating systems:** Windows 11 (x64), Ubuntu 24.04 (x86\_64).
+* **Python:** CPython **3.11.x** (pinned via `.python-version`).
+* **Package manager:** **uv** for all tasks: Python provisioning, lock, sync, run, build.
+* **Layout:** `src/` package layout.
+* **CLI:** Typer app with **callback** to force “group” semantics (`pytaf init` works even if it’s the only command).
+
+---
+
+## 1) Install uv and provision Python
+
+### 1.1 Install uv
+
+**Windows (PowerShell 7+):**
+
+```powershell
+irm https://astral.sh/uv/install.ps1 | iex
+uv --version
+```
+
+**Ubuntu 24.04:**
+
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+exec $SHELL -l
+uv --version
+```
+
+### 1.2 Install and pin Python 3.11.x (e.g., 3.11.9)
+
+```bash
+uv python install 3.11.9
+uv python list
+uv python pin 3.11.9     # writes .python-version at repo root
+```
+
+Commit `.python-version` to ensure everyone uses the same interpreter.
+
+---
+
+## 2) Create repository skeleton
+
+From an empty directory (e.g., `~/dev/pytaf`):
+
+```bash
+mkdir -p src/pytaf/{cli,transport}
+mkdir -p tests/echo_contract
+mkdir -p bench/cal
+mkdir -p docs
+mkdir -p .github/workflows
+```
+
+### 2.1 `.gitignore`
+
+```gitignore
+# Virtual environment
+.venv/
+
+# Python cache
+__pycache__/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Build artifacts
+build/
+dist/
+*.egg-info
+
+# Misc
+.DS_Store
+.coverage
+coverage.xml
+```
+
+### 2.2 `.gitattributes`
+
+```gitattributes
+*     text=auto eol=lf
+*.ps1 text eol=crlf
+*.bat text eol=crlf
+*.sh  text eol=lf
+```
+
+### 2.3 `.editorconfig`
+
+```ini
+root = true
+
+[*]
+end_of_line = lf
+insert_final_newline = true
+charset = utf-8
+indent_style = space
+indent_size = 4
+
+[*.{toml,yml,yaml,json,md}]
+indent_size = 2
+```
+
+### 2.4 `README.md`
+
+```md
+# PyTAF — Phase 0
+uv-managed bootstrap with `src/` layout, echo transport, typed SPI, and a working CLI
+(`pytaf init`). Targets Python 3.11 on Windows 11 and Ubuntu 24.04. All workflows use `uv`.
+```
+
+### 2.5 `LICENSE`
+
+Add the desired license (e.g., MIT).
+
+---
+
+## 3) Project configuration (`pyproject.toml`)
+
+Use Hatch as build backend; define runtime and dev toolchains; expose a console script entry point that calls a function.
+
+```toml
+[build-system]
+requires = ["hatchling>=1.25.0"]
+build-backend = "hatchling.build"
+
+[project]
+name = "pytaf"
+version = "0.0.0a1"
+description = "PyTAF — Hardened Core v1 (Phase 0 bootstrap)"
+readme = "README.md"
+requires-python = "==3.11.*"
+license = "MIT"
+authors = [{ name = "RF Automation Team" }]
+
+dependencies = [
+  "typer>=0.12.0",
+  "rich>=13.7.0",
+  "tomli-w>=1.0.0",
+  "platformdirs>=4.2.0",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.2.0",
+  "pytest-xdist>=3.5.0",
+  "pytest-randomly>=3.15.0",
+  "coverage>=7.6.0",
+  "ruff>=0.6.9",
+  "mypy>=1.11.2",
+  "nox>=2024.4.15",
+  "pre-commit>=3.7.0",
+  "hatchling>=1.25.0",
+  "editables>=0.5",
+]
+
+[dependency-groups]
+dev = [
+  "pytest>=8.2.0",
+  "pytest-xdist>=3.5.0",
+  "pytest-randomly>=3.15.0",
+  "coverage>=7.6.0",
+  "ruff>=0.6.9",
+  "mypy>=1.11.2",
+  "nox>=2024.4.15",
+  "pre-commit>=3.7.0",
+  "hatchling>=1.25.0",
+  "editables>=0.5",
+]
+
+[project.scripts]
+pytaf = "pytaf.cli.main:main"
+
+[tool.uv]
+# Restrict lock resolution to CPython 3.11 on Windows/Linux
+environments = ["python_version == '3.11' and (sys_platform == 'win32' or sys_platform == 'linux')"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E","F","I","UP","B","PIE","A","SIM"]
+
+[tool.ruff.format]
+quote-style = "double"
+
+[tool.pytest.ini_options]
+addopts = "-q --randomly-seed=12345"
+testpaths = ["tests"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+warn_unused_ignores = true
+warn_redundant_casts = true
+warn_unreachable = true
+mypy_path = ["src"]
+ignore_missing_imports = true
+
+# Hatch src-layout: explicit source root + package
+[tool.hatch.build]
+sources = ["src"]
+include = ["LICENSE"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["pytaf"]
+
+[tool.hatch.build.targets.sdist]
+include = [
+  "src/pytaf",
+  "pyproject.toml",
+  "README.md",
+  "LICENSE",
+]
+```
+
+---
+
+## 4) Package code (src layout)
+
+### 4.1 Core package
+
+`src/pytaf/__init__.py`
+
+```python
+__version__ = "0.0.0a1"
+```
+
+`src/pytaf/__main__.py`
+
+```python
+from pytaf.cli.main import main
+
+if __name__ == "__main__":
+    main()
+```
+
+### 4.2 CLI (`pytaf init`) with **group semantics**
+
+Typer promotes a single command to a “default command,” which breaks `pytaf init`. Force group semantics with a **root callback**.
+
+`src/pytaf/cli/__init__.py`
+
+```python
+# explicit package
+```
+
+`src/pytaf/cli/main.py`
+
+```python
+from __future__ import annotations
+import typer
+from rich.console import Console
+from pytaf.cli import init as init_mod
+
+# Group semantics + show help when no args are provided
+app = typer.Typer(add_completion=False, no_args_is_help=True)
+console = Console()
+
+@app.callback()
+def _root_callback() -> None:
+    """
+    Root command group for PyTAF.
+    Exists to enforce explicit subcommands.
+    """
+
+@app.command("init")
+def cmd_init(
+    non_interactive: bool = typer.Option(
+        False, "--non-interactive",
+        help="Write bench.local.toml without prompts"
+    ),
+) -> None:
+    init_mod.run(non_interactive=non_interactive)
+
+def main() -> None:
+    app()
+
+if __name__ == "__main__":
+    main()
+```
+
+`src/pytaf/cli/init.py`
+
+```python
+from __future__ import annotations
+from pathlib import Path
+import sys
+import tomli_w
+from rich.console import Console
+from platformdirs import user_data_dir
+
+console = Console()
+
+def _default_results_root() -> str:
+    return str(Path(user_data_dir("pytaf", "rf_automation_team")).resolve())
+
+TEMPLATE = {
+    "schema_version": "bench.v1",
+    "bench_id": "local_bench",
+    "project": "scratch",
+    "results": {
+        "root": _default_results_root(),
+        "excel_safe_csv": True,
+    },
+    "resources": {},
+    "aliases": {},
+}
+
+def run(non_interactive: bool = False) -> None:
+    bench_dir = Path("bench")
+    bench_dir.mkdir(exist_ok=True, parents=True)
+    path = bench_dir / "bench.local.toml"
+    if path.exists():
+        console.print(f"[yellow]bench.local.toml already exists at {path}[/yellow]")
+        sys.exit(0)
+    with path.open("wb") as f:
+        tomli_w.dump(TEMPLATE, f)
+    (bench_dir / "cal").mkdir(exist_ok=True)
+    console.print(f"[green]Wrote {path} and created bench/cal/.[/green]")
+```
+
+### 4.3 Transport SPI and echo backend
+
+`src/pytaf/transport/__init__.py`
+
+```python
+# explicit package
+```
+
+`src/pytaf/transport/spi.py`
+
+```python
+from __future__ import annotations
+from typing import Protocol, Optional, Literal
+from dataclasses import dataclass
+
+@dataclass
+class Budgets:
+    write_ms: int
+    complete_ms: int
+    read_ms: int
+    total_ms: int
+
+@dataclass
+class TransportDiag:
+    bytes_tx: int = 0
+    bytes_rx: int = 0
+    last_timeout_phase: Optional[Literal["write","complete","read"]] = None
+    reconnects: int = 0
+    zero_len_read_events: int = 0
+    zero_len_backoffs: int = 0
+    paced_writes: int = 0
+    last_diag_query_ok: Optional[bool] = None
+
+class Transport(Protocol):
+    def open(self) -> None: ...
+    def close(self) -> None: ...
+    def transact(self, tx: bytes, *, budgets: Budgets) -> bytes: ...
+    @property
+    def resource(self) -> str: ...
+    @property
+    def backend(self) -> str: ...
+    @property
+    def diag(self) -> TransportDiag: ...
+```
+
+`src/pytaf/transport/echo.py`
+
+```python
+from __future__ import annotations
+import time
+from dataclasses import dataclass
+from pytaf.transport.spi import Transport, Budgets, TransportDiag
+
+@dataclass
+class EchoConfig:
+    latency_ms: int = 3
+    fragment_bytes: int = 0
+    delayed_trailer_ms: int = 0
+    zero_len_every: int = 0
+    rst_after_bytes: int = 0
+
+class EchoTransport(Transport):
+    def __init__(self, uri: str, cfg: EchoConfig | None = None):
+        self._uri = uri
+        self._cfg = cfg or EchoConfig()
+        self._open = False
+        self._diag = TransportDiag()
+
+    @property
+    def resource(self) -> str: return self._uri
+    @property
+    def backend(self) -> str: return "echo"
+    @property
+    def diag(self) -> TransportDiag: return self._diag
+
+    def open(self) -> None:
+        self._open = True
+
+    def close(self) -> None:
+        self._open = False
+
+    def transact(self, tx: bytes, *, budgets: Budgets) -> bytes:
+        if not self._open:
+            raise RuntimeError("transport not open")
+        self._diag.bytes_tx += len(tx)
+        time.sleep(max(self._cfg.latency_ms, 0) / 1000.0)
+        if self._cfg.rst_after_bytes and len(tx) >= self._cfg.rst_after_bytes:
+            self._open = False
+            self._diag.reconnects += 1
+            raise ConnectionError("echo: simulated RST-like abort")
+        payload = tx
+        if self._cfg.fragment_bytes and len(payload) > self._cfg.fragment_bytes:
+            parts = []
+            for i in range(0, len(payload), self._cfg.fragment_bytes):
+                parts.append(payload[i:i+self._cfg.fragment_bytes])
+                time.sleep(0.0005)
+            payload = b"".join(parts)
+        if self._cfg.delayed_trailer_ms:
+            time.sleep(self._cfg.delayed_trailer_ms / 1000.0)
+        self._diag.bytes_rx += len(payload)
+        return payload
+```
+
+---
+
+## 5) Tests
+
+`tests/echo_contract/test_echo_basic.py`
+
+```python
+from pytaf.transport.echo import EchoTransport, EchoConfig
+from pytaf.transport.spi import Budgets
+
+B = Budgets(write_ms=200, complete_ms=200, read_ms=200, total_ms=800)
+
+def test_open_close_transact_identity():
+    t = EchoTransport("pytaf+echo://local", EchoConfig(latency_ms=1))
+    t.open()
+    out = t.transact(b"*IDN?", budgets=B)
+    assert out == b"*IDN?"
+    t.close()
+
+def test_fragmentation_and_trailer():
+    t = EchoTransport("pytaf+echo://local",
+                      EchoConfig(latency_ms=1, fragment_bytes=2, delayed_trailer_ms=1))
+    t.open()
+    out = t.transact(b"ABCDEFGH", budgets=B)
+    assert out == b"ABCDEFGH"
+    t.close()
+
+def test_rst_abort_closes_transport():
+    t = EchoTransport("pytaf+echo://local", EchoConfig(latency_ms=1, rst_after_bytes=3))
+    t.open()
+    try:
+        t.transact(b"HELLO", budgets=B)
+        assert False, "ConnectionError expected"
+    except ConnectionError:
+        pass
+    try:
+        t.transact(b"*IDN?", budgets=B)
+        assert False, "RuntimeError expected after RST"
+    except RuntimeError:
+        pass
+```
+
+`tests/echo_contract/test_cli_smoke.py`
+
+```python
+from typer.testing import CliRunner
+from pytaf.cli.main import app
+import os
+
+def test_cli_help_displays():
+    r = CliRunner().invoke(app, ["--help"])
+    assert r.exit_code == 0
+    assert "init" in r.stdout
+
+def test_init_creates_bench_and_cal():
+    runner = CliRunner()
+    with runner.isolated_filesystem():
+        r = runner.invoke(app, ["init", "--non-interactive"])
+        assert r.exit_code == 0
+        assert os.path.exists("bench/bench.local.toml")
+        assert os.path.isdir("bench/cal")
+```
+
+`tests/echo_contract/test_version.py`
+
+```python
+import pytaf
+def test_version_present():
+    assert hasattr(pytaf, "__version__")
+```
+
+`tests/echo_contract/test_entrypoint.py`
+
+```python
+from importlib.metadata import entry_points
+def test_console_script_registered():
+    eps = entry_points(group="console_scripts")
+    assert any(ep.name == "pytaf" and ep.value == "pytaf.cli.main:main" for ep in eps)
+```
+
+---
+
+## 6) Create environment, lock, sync, and smoke-test
+
+```bash
+uv venv -p 3.11 .venv
+
+# Linux
+source .venv/bin/activate
+# Windows (PowerShell)
+# . .\.venv\Scripts\Activate.ps1
+
+uv lock
+uv sync --group dev --locked
+
+# CLI smoke
+uv run pytaf --help
+uv run pytaf init --non-interactive
+ls -la bench/bench.local.toml bench/cal/
+```
+
+**Notes**
+
+* `uv lock` creates/updates `uv.lock`, which must be committed.
+* `uv sync --group dev --locked` installs exactly what’s in the lock and the **dev** toolchain.
+
+---
+
+## 7) Dev tooling
+
+### 7.1 Pre-commit
+
+`.pre-commit-config.yaml`
+
+```yaml
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.6.9
+    hooks:
+      - id: ruff
+        args: [--fix]
+      - id: ruff-format
+
+  - repo: https://github.com/astral-sh/mirrors-mypy
+    rev: v1.11.2
+    hooks:
+      - id: mypy
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: check-toml
+      - id: check-yaml
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+```
+
+Install hooks:
+
+```bash
+uv run pre-commit install
+```
+
+### 7.2 Nox (reuse uv env)
+
+`noxfile.py`
+
+```python
+import nox
+
+@nox.session(venv_backend="none")
+def tests(session: nox.Session):
+    session.run("uv", "run", "pytest", "-q", external=True)
+
+@nox.session(venv_backend="none")
+def lint(session: nox.Session):
+    session.run("uv", "run", "ruff", "check", "--fix", ".", external=True)
+    session.run("uv", "run", "ruff", "format", "--check", ".", external=True)
+    session.run("uv", "run", "mypy", "src", external=True)
+```
+
+---
+
+## 8) Continuous Integration (GitHub Actions)
+
+A single workflow for PRs that enforces lock stability, installs from the lock, runs lint/types/tests, and does a CLI smoke.
+
+`.github/workflows/ci.yml`
+
+```yaml
+name: ci
+on: [push, pull_request]
+env:
+  TZ: UTC
+  LC_ALL: C.UTF-8
+  LANG: C.UTF-8
+
+jobs:
+  linux:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - uses: astral-sh/setup-uv@v6
+
+      - name: Setup uv env and lock
+        run: |
+          uv python install 3.11.9
+          uv venv -p 3.11 .venv
+          source .venv/bin/activate
+          uv lock
+
+      - name: Guard: uv.lock must be committed (no drift)
+        run: |
+          git diff --quiet -- uv.lock || { git --no-pager diff -U0 -- uv.lock; echo "uv.lock changed; commit it"; exit 1; }
+
+      - name: Dev install from lock & parity sanity
+        run: |
+          source .venv/bin/activate
+          uv sync --group dev --locked
+
+      - name: Lint, typecheck, tests
+        run: |
+          source .venv/bin/activate
+          uv run ruff check .
+          uv run ruff format --check .
+          uv run mypy src
+          uv run pytest -q
+
+      - name: CLI smoke
+        run: |
+          source .venv/bin/activate
+          uv run pytaf --help
+          uv run pytaf init --non-interactive
+
+  windows:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - uses: astral-sh/setup-uv@v6
+
+      - name: Setup uv env and lock
+        shell: pwsh
+        run: |
+          uv python install 3.11.9
+          uv venv -p 3.11 .venv
+          . .\.venv\Scripts\Activate.ps1
+          uv lock
+
+      - name: Guard: uv.lock must be committed (no drift)
+        shell: pwsh
+        run: |
+          git diff --quiet -- uv.lock; if ($LASTEXITCODE -ne 0) { git --no-pager diff -U0 -- uv.lock; Write-Host "uv.lock changed; commit it"; exit 1 }
+
+      - name: Dev install from lock
+        shell: pwsh
+        run: |
+          . .\.venv\Scripts\Activate.ps1
+          uv sync --group dev --locked
+
+      - name: Lint, typecheck, tests
+        shell: pwsh
+        run: |
+          . .\.venv\Scripts\Activate.ps1
+          uv run ruff check .
+          uv run ruff format --check .
+          uv run mypy src
+          uv run pytest -q
+
+      - name: CLI smoke
+        shell: pwsh
+        run: |
+          . .\.venv\Scripts\Activate.ps1
+          uv run pytaf --help
+          uv run pytaf init --non-interactive
+```
+
+---
+
+## 9) Developer workflow (local)
+
+1. **Clone** the repo.
+2. **Provision** the environment:
+
+   ```bash
+   uv python install 3.11.9
+   uv venv -p 3.11 .venv
+   source .venv/bin/activate   # Windows: . .\.venv\Scripts\Activate.ps1
+   ```
+3. **Lock & sync**:
+
+   ```bash
+   uv lock
+   uv sync --group dev --locked
+   ```
+4. **Run quality gates**:
+
+   ```bash
+   uv run ruff check .
+   uv run ruff format --check .
+   uv run mypy src
+   uv run pytest -q
+   ```
+5. **CLI smoke**:
+
+   ```bash
+   uv run pytaf --help
+   uv run pytaf init --non-interactive
+   ls -la bench/bench.local.toml bench/cal/
+   ```
+6. **Build a wheel** (when needed):
+
+   ```bash
+   uv build --wheel
+   ls dist/pytaf-*.whl
+   ```
+
+---
+
+## 10) Troubleshooting
+
+* **`pytaf init` says “unexpected extra argument (init)”**
+  Ensure your CLI has the **root callback** to force group semantics (see §4.2). Reinstall if needed:
+
+  ```bash
+  uv pip uninstall pytaf
+  uv sync --group dev --locked
+  uv run pytaf --help
+  ```
+
+* **`pytaf` not found or imports fail**
+  Confirm install and entry point:
+
+  ```bash
+  python - <<'PY'
+  ```
+
+import importlib.metadata as md
+ep = next((e for e in md.entry\_points(group="console\_scripts") if e.name=="pytaf"), None)
+print("entrypoint:", ep.value if ep else "<missing>")
+PY
+
+```
+It must print `pytaf.cli.main:main`. If not, `uv sync` again.
+
+- **Lock drift in CI**
+CI will fail if `uv.lock` would change. Run `uv lock`, commit the updated lock, and push.
+
+---
+
+## 11) Phase 0 acceptance criteria
+
+- `uv.lock` and `.python-version` are committed.
+- `uv sync --group dev --locked` succeeds on Windows and Linux.
+- `uv run pytaf --help` shows a **Commands** section with `init`.
+- `uv run pytaf init --non-interactive` creates `bench/bench.local.toml` and `bench/cal/`.
+- `pytest`, `ruff`, and `mypy` pass locally and in CI.
+- Building a wheel with `uv build --wheel` succeeds.
+
+---
+
+**End of Phase 0 (online-first, uv-managed baseline).**
+::contentReference[oaicite:0]{index=0}
+```

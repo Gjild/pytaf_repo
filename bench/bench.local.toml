@@ -1,0 +1,11 @@
+schema_version = "bench.v1"
+bench_id = "local_bench"
+project = "scratch"
+
+[results]
+root = "/home/mikkel.baumannjorgen/.local/share/pytaf"
+excel_safe_csv = true
+
+[resources]
+
+[aliases]
