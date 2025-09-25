@@ -3487,7 +3487,7 @@ def _run_pytaf_run(cwd: Path) -> int:
 def test_run_creates_artifacts(tmp_path: Path):
     bench = tmp_path / "bench"; bench.mkdir()
     (bench/"bench.local.toml").write_text(
-        'schema_version="bench.v1"\n[results]\nroot="%s"\n' % tmp_path.as_posix(),
+        f'schema_version="bench.v1"\n[results]\nroot="{tmp_path.as_posix()}"',
         encoding="utf-8"
     )
     rc = _run_pytaf_run(tmp_path)
@@ -3536,7 +3536,7 @@ from pathlib import Path
 def test_parent_signal_path(tmp_path: Path):
     bench = tmp_path / "bench"; bench.mkdir()
     (bench/"bench.local.toml").write_text(
-        'schema_version="bench.v1"\n[results]\nroot="%s"\n' % tmp_path.as_posix(),
+        f'schema_version="bench.v1"\n[results]\nroot="{tmp_path.as_posix()}"',
         encoding="utf-8"
     )
     p = subprocess.Popen([sys.executable, "-m", "pytaf.cli.run", "--bench", "bench/bench.local.toml"], cwd=tmp_path)
@@ -3569,7 +3569,7 @@ import pytest
 def test_latest_junction_does_not_delete_target_or_real_dir(tmp_path: Path):
     bench = tmp_path / "bench"; bench.mkdir()
     (bench/"bench.local.toml").write_text(
-        'schema_version="bench.v1"\n[results]\nroot="%s"\n' % tmp_path.as_posix(),
+        f'schema_version="bench.v1"\n[results]\nroot="{tmp_path.as_posix()}"',
         encoding="utf-8"
     )
     subprocess.check_call([sys.executable, "-m", "pytaf.cli.run", "--bench", "bench/bench.local.toml"], cwd=tmp_path)
@@ -3606,7 +3606,7 @@ import msgspec
 def test_control_preempts_bulk_single_control(tmp_path: Path):
     bench = tmp_path / "bench"; bench.mkdir()
     (bench/"bench.local.toml").write_text(
-        'schema_version="bench.v1"\n[results]\nroot="%s"\n' % tmp_path.as_posix(),
+        f'schema_version="bench.v1"\n[results]\nroot="{tmp_path.as_posix()}"',
         encoding="utf-8"
     )
     rc = subprocess.run([sys.executable, "-m", "pytaf.cli.run", "--bench", "bench/bench.local.toml"], cwd=tmp_path).returncode
@@ -3635,7 +3635,7 @@ import msgspec
 def test_multi_control_fifo_over_bulk(tmp_path: Path):
     bench = tmp_path / "bench"; bench.mkdir()
     (bench/"bench.local.toml").write_text(
-        'schema_version="bench.v1"\n[results]\nroot="%s"\n' % tmp_path.as_posix(),
+        f'schema_version="bench.v1"\n[results]\nroot="{tmp_path.as_posix()}"',
         encoding="utf-8")
     rc = subprocess.run([sys.executable, "-m", "pytaf.cli.run", "--bench", "bench/bench.local.toml"], cwd=tmp_path).returncode
     assert rc in (0,1,24)
@@ -3682,7 +3682,7 @@ from pathlib import Path
 def test_stale_temp_blocks_without_ack(tmp_path: Path):
     bench = tmp_path / "bench"; bench.mkdir()
     (bench/"bench.local.toml").write_text(
-        'schema_version="bench.v1"\n[results]\nroot="%s"\n' % tmp_path.as_posix(),
+        f'schema_version="bench.v1"\n[results]\nroot="{tmp_path.as_posix()}"',
         encoding="utf-8"
     )
     (tmp_path / "results.v1.jsonl.tmp").write_text("junk", encoding="utf-8")
@@ -3701,7 +3701,7 @@ from pathlib import Path
 def test_kill_last_run_resolves_latest_and_safety(tmp_path: Path):
     bench = tmp_path / "bench"; bench.mkdir()
     (bench/"bench.local.toml").write_text(
-        'schema_version="bench.v1"\n[results]\nroot="%s"\n' % tmp_path.as_posix(),
+        f'schema_version="bench.v1"\n[results]\nroot="{tmp_path.as_posix()}"',
         encoding="utf-8"
     )
     p = subprocess.Popen([sys.executable, "-m", "pytaf.cli.run", "--bench", "bench/bench.local.toml"], cwd=tmp_path)
@@ -3719,7 +3719,7 @@ from pathlib import Path
 def test_sidecar_blob_created(tmp_path: Path):
     bench = tmp_path / "bench"; bench.mkdir()
     (bench/"bench.local.toml").write_text(
-        'schema_version="bench.v1"\n[results]\nroot="%s"\n' % tmp_path.as_posix(),
+        f'schema_version="bench.v1"\n[results]\nroot="{tmp_path.as_posix()}"',
         encoding="utf-8"
     )
     rc = subprocess.run([sys.executable, "-m", "pytaf.cli.run", "--bench", "bench/bench.local.toml"], cwd=tmp_path).returncode
@@ -3738,7 +3738,7 @@ from pathlib import Path
 def test_ipc_size_cap_error(tmp_path: Path):
     bench = tmp_path / "bench"; bench.mkdir()
     (bench/"bench.local.toml").write_text(
-        'schema_version="bench.v1"\n[results]\nroot="%s"\n' % tmp_path.as_posix(),
+        f'schema_version="bench.v1"\n[results]\nroot="{tmp_path.as_posix()}"',
         encoding="utf-8"
     )
     env = dict(os.environ)
@@ -3773,7 +3773,7 @@ from pathlib import Path
 def test_control_storm_allows_bulk_progress(tmp_path: Path):
     bench = tmp_path / "bench"; bench.mkdir()
     (bench/"bench.local.toml").write_text(
-        'schema_version="bench.v1"\n[results]\nroot="%s"\n' % tmp_path.as_posix(),
+        f'schema_version="bench.v1"\n[results]\nroot="{tmp_path.as_posix()}"',
         encoding="utf-8"
     )
     env = {"PYTAF_CONTROL_BURST_LIMIT": "2"}
@@ -3794,7 +3794,7 @@ from pathlib import Path
 def test_trace_inline_threshold_env(tmp_path: Path):
     bench = tmp_path / "bench"; bench.mkdir()
     (bench/"bench.local.toml").write_text(
-        'schema_version="bench.v1"\n[results]\nroot="%s"\n' % tmp_path.as_posix(),
+        f'schema_version="bench.v1"\n[results]\nroot="{tmp_path.as_posix()}"',
         encoding="utf-8"
     )
     env = {"PYTAF_TRACE_INLINE_MAX": "4096"}
@@ -3831,7 +3831,7 @@ import pytest
 @pytest.mark.skipif(os.name != "nt", reason="Windows-only")
 def test_broken_junction_recreate(tmp_path: Path):
     bench = tmp_path / "bench"; bench.mkdir()
-    (bench/"bench.local.toml").write_text('schema_version="bench.v1"\n[results]\nroot="%s"\n' % tmp_path.as_posix(), encoding="utf-8")
+    (bench/"bench.local.toml").write_text(f'schema_version="bench.v1"\n[results]\nroot="{tmp_path.as_posix()}"', encoding="utf-8")
     subprocess.check_call([sys.executable, "-m", "pytaf.cli.run", "--bench", "bench/bench.local.toml"], cwd=tmp_path)
     rd = max([p for p in tmp_path.glob("run_*") if p.is_dir()], key=lambda p: p.stat().st_mtime)
     shutil.rmtree(rd)

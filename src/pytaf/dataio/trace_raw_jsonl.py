@@ -1,0 +1,67 @@
+from __future__ import annotations
+
+import base64
+from contextlib import ExitStack
+import os
+from pathlib import Path
+from typing import Any
+
+import msgspec
+
+from .trace_blobs import put_blob
+from .win_durability import flush_dir_anchor_if_windows
+
+
+def _env_int(name: str, default: int, lo: int, hi: int) -> int:
+    try:
+        v = int(os.environ.get(name, str(default)))
+        return max(lo, min(v, hi))
+    except Exception:
+        return default
+
+class TraceWriter:
+    """
+    Persistent JSONL trace writer. File handle intentionally kept open;
+    managed by ExitStack. The open() call is annotated.
+    """
+    def __init__(self, root: Path):
+        raw = _env_int("PYTAF_TRACE_INLINE_MAX", 256, 0, 4 * 1024 * 1024)
+        self._inline_max = max(64, raw)
+        self._enc = msgspec.json.Encoder()
+        self._path = root / "trace.raw.v1.jsonl"
+        self._stack = ExitStack()
+        self._f = self._stack.enter_context(open(self._path, "wb", buffering=0))  # noqa: SIM115
+        (root / "trace.version.txt").write_text("trace.raw.v1\n", encoding="utf-8")
+
+    def _write_row(self, row: dict[str, Any]) -> None:
+        self._f.write(self._enc.encode(row))
+        self._f.write(b"\n")
+
+    def tx(self, t_ns: int, uri: str, payload: bytes) -> None:
+        self._emit("tx", t_ns, uri, payload)
+
+    def rx(self, t_ns: int, uri: str, payload: bytes) -> None:
+        self._emit("rx", t_ns, uri, payload)
+
+    def _emit(self, dir_: str, t_ns: int, uri: str, payload: bytes) -> None:
+        row: dict[str, Any] = {
+            "version": "trace.raw.v1",
+            "dir": dir_,
+            "t_ns": t_ns,
+            "uri": uri,
+            "len": len(payload),
+        }
+        if len(payload) <= self._inline_max:
+            row["enc"] = "b64"
+            row["b64"] = base64.b64encode(payload).decode("ascii")
+        else:
+            h, _ = put_blob(self._path.parent, payload)
+            row["enc"] = "blob"
+            row["blob"] = f"sha256:{h}"
+        self._write_row(row)
+
+    def close(self) -> None:
+        self._f.flush()
+        os.fsync(self._f.fileno())
+        self._stack.close()
+        flush_dir_anchor_if_windows(self._path.parent)

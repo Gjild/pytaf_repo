@@ -5,10 +5,10 @@ build-backend = "hatchling.build"
 [project]
 name = "pytaf"
 version = "0.0.0a1"
-description = "PyTAF — Hardened Core v1 (Phase 0 bootstrap)"
+description = "PyTAF Phase 1: uv-managed echo runtime with preemptive broker, cancellation ladders, durable artifacts, relocation/stale-temp gate, kill lock safety"
 readme = "README.md"
-requires-python = "==3.11.*"
-license = "MIT"
+requires-python = ">=3.11,<3.13"
+license = { text = "Proprietary" }
 authors = [{ name = "RF Automation Team" }]
 
 # Runtime dependencies (VISA-free in Phase 0)
@@ -18,6 +18,8 @@ dependencies = [
   "rich>=13.7.0",
   "tomli-w>=1.0.0",
   "platformdirs>=4.2.0",
+  "msgspec>=0.19.0",
+  "typing-extensions>=4.15.0",
 ]
 
 # Optional but recommended metadata for future governance
@@ -32,12 +34,13 @@ dev = [
   "pytest-xdist>=3.5.0",
   "pytest-randomly>=3.15.0",
   "coverage>=7.6.0",
-  "ruff>=0.6.9",
+  "ruff==0.13.1",  # pin
   "mypy>=1.11.2",
   "nox>=2024.4.15",
   "pre-commit>=3.7.0",
   "hatchling>=1.25.0",
   "editables>=0.5",
+  "pytest-timeout>=2.4.0",
 ]
 
 [dependency-groups]
@@ -47,12 +50,13 @@ dev = [
   "pytest-xdist>=3.5.0",
   "pytest-randomly>=3.15.0",
   "coverage>=7.6.0",
-  "ruff>=0.6.9",
+  "ruff==0.13.1",  # pin
   "mypy>=1.11.2",
   "nox>=2024.4.15",
   "pre-commit>=3.7.0",
   "hatchling>=1.25.0",
   "editables>=0.5",
+  "pytest-timeout>=2.4.0",
 ]
 
 [project.scripts]
@@ -64,14 +68,25 @@ pytaf = "pytaf.cli.main:main"
 environments = ["python_version == '3.11' and (sys_platform == 'win32' or sys_platform == 'linux')"]
 
 [tool.ruff]
-line-length = 100
+line-length = 120
 target-version = "py311"
 
 [tool.ruff.lint]
 select = ["E","F","I","UP","B","PIE","A","SIM"]
+fixable = ["ALL"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["pytaf"]
+combine-as-imports = true
+force-sort-within-sections = true
 
 [tool.ruff.format]
 quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+docstring-code-format = true
+docstring-code-line-length = "dynamic"
 
 [tool.pytest.ini_options]
 addopts = "-q --randomly-seed=12345"

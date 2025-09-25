@@ -1,11 +1,11 @@
 version = 1
 revision = 2
-requires-python = "==3.11.*"
+requires-python = ">=3.11, <3.13"
 resolution-markers = [
-    "sys_platform == 'linux' or sys_platform == 'win32'",
+    "(python_full_version < '3.12' and sys_platform == 'linux') or (python_full_version < '3.12' and sys_platform == 'win32')",
 ]
 supported-markers = [
-    "sys_platform == 'linux' or sys_platform == 'win32'",
+    "(python_full_version < '3.12' and sys_platform == 'linux') or (python_full_version < '3.12' and sys_platform == 'win32')",
 ]
 
 [[package]]
@@ -40,7 +40,7 @@ name = "click"
 version = "8.3.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "colorama", marker = "sys_platform == 'win32'" },
+    { name = "colorama", marker = "python_full_version < '3.12' and sys_platform == 'win32'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/46/61/de6cd827efad202d7057d93e0fed9294b96952e188f7384832791c7b2254/click-8.3.0.tar.gz", hash = "sha256:e7b8232224eba16f4ebe410c25ced9f7875cb5f3263ffc93cc3e8da705e229c4", size = 276943, upload-time = "2025-09-18T17:32:23.696Z" }
 wheels = [
@@ -61,7 +61,7 @@ name = "colorlog"
 version = "6.9.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "colorama", marker = "sys_platform == 'win32'" },
+    { name = "colorama", marker = "python_full_version < '3.12' and sys_platform == 'win32'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/d3/7a/359f4d5df2353f26172b3cc39ea32daa39af8de522205f512f458923e677/colorlog-6.9.0.tar.gz", hash = "sha256:bfba54a1b93b94f54e1f4fe48395725a3d92fd2a4af702f6bd70946bdc0c6ac2", size = 16624, upload-time = "2024-10-29T18:34:51.011Z" }
 wheels = [
@@ -85,6 +85,17 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/2f/88/a23cc185f6a805dfc4fdf14a94016835eeb85e22ac3a0e66d5e89acd6462/coverage-7.10.7-cp311-cp311-win32.whl", hash = "sha256:972b9e3a4094b053a4e46832b4bc829fc8a8d347160eb39d03f1690316a99c14", size = 220536, upload-time = "2025-09-21T20:01:32.184Z" },
     { url = "https://files.pythonhosted.org/packages/fe/ef/0b510a399dfca17cec7bc2f05ad8bd78cf55f15c8bc9a73ab20c5c913c2e/coverage-7.10.7-cp311-cp311-win_amd64.whl", hash = "sha256:a7b55a944a7f43892e28ad4bc0561dfd5f0d73e605d1aa5c3c976b52aea121d2", size = 221425, upload-time = "2025-09-21T20:01:33.557Z" },
     { url = "https://files.pythonhosted.org/packages/51/7f/023657f301a276e4ba1850f82749bc136f5a7e8768060c2e5d9744a22951/coverage-7.10.7-cp311-cp311-win_arm64.whl", hash = "sha256:736f227fb490f03c6488f9b6d45855f8e0fd749c007f9303ad30efab0e73c05a", size = 220103, upload-time = "2025-09-21T20:01:34.929Z" },
+    { url = "https://files.pythonhosted.org/packages/66/80/4c49f7ae09cafdacc73fbc30949ffe77359635c168f4e9ff33c9ebb07838/coverage-7.10.7-cp312-cp312-manylinux1_i686.manylinux_2_28_i686.manylinux_2_5_i686.whl", hash = "sha256:399a0b6347bcd3822be369392932884b8216d0944049ae22925631a9b3d4ba4c", size = 250020, upload-time = "2025-09-21T20:01:39.617Z" },
+    { url = "https://files.pythonhosted.org/packages/a6/90/a64aaacab3b37a17aaedd83e8000142561a29eb262cede42d94a67f7556b/coverage-7.10.7-cp312-cp312-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl", hash = "sha256:314f2c326ded3f4b09be11bc282eb2fc861184bc95748ae67b360ac962770be7", size = 252769, upload-time = "2025-09-21T20:01:41.341Z" },
+    { url = "https://files.pythonhosted.org/packages/98/2e/2dda59afd6103b342e096f246ebc5f87a3363b5412609946c120f4e7750d/coverage-7.10.7-cp312-cp312-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:c41e71c9cfb854789dee6fc51e46743a6d138b1803fab6cb860af43265b42ea6", size = 253901, upload-time = "2025-09-21T20:01:43.042Z" },
+    { url = "https://files.pythonhosted.org/packages/53/dc/8d8119c9051d50f3119bb4a75f29f1e4a6ab9415cd1fa8bf22fcc3fb3b5f/coverage-7.10.7-cp312-cp312-manylinux_2_31_riscv64.manylinux_2_39_riscv64.whl", hash = "sha256:bc01f57ca26269c2c706e838f6422e2a8788e41b3e3c65e2f41148212e57cd59", size = 250413, upload-time = "2025-09-21T20:01:44.469Z" },
+    { url = "https://files.pythonhosted.org/packages/98/b3/edaff9c5d79ee4d4b6d3fe046f2b1d799850425695b789d491a64225d493/coverage-7.10.7-cp312-cp312-musllinux_1_2_aarch64.whl", hash = "sha256:a6442c59a8ac8b85812ce33bc4d05bde3fb22321fa8294e2a5b487c3505f611b", size = 251820, upload-time = "2025-09-21T20:01:45.915Z" },
+    { url = "https://files.pythonhosted.org/packages/11/25/9a0728564bb05863f7e513e5a594fe5ffef091b325437f5430e8cfb0d530/coverage-7.10.7-cp312-cp312-musllinux_1_2_i686.whl", hash = "sha256:78a384e49f46b80fb4c901d52d92abe098e78768ed829c673fbb53c498bef73a", size = 249941, upload-time = "2025-09-21T20:01:47.296Z" },
+    { url = "https://files.pythonhosted.org/packages/e0/fd/ca2650443bfbef5b0e74373aac4df67b08180d2f184b482c41499668e258/coverage-7.10.7-cp312-cp312-musllinux_1_2_riscv64.whl", hash = "sha256:5e1e9802121405ede4b0133aa4340ad8186a1d2526de5b7c3eca519db7bb89fb", size = 249519, upload-time = "2025-09-21T20:01:48.73Z" },
+    { url = "https://files.pythonhosted.org/packages/24/79/f692f125fb4299b6f963b0745124998ebb8e73ecdfce4ceceb06a8c6bec5/coverage-7.10.7-cp312-cp312-musllinux_1_2_x86_64.whl", hash = "sha256:d41213ea25a86f69efd1575073d34ea11aabe075604ddf3d148ecfec9e1e96a1", size = 251375, upload-time = "2025-09-21T20:01:50.529Z" },
+    { url = "https://files.pythonhosted.org/packages/5e/75/61b9bbd6c7d24d896bfeec57acba78e0f8deac68e6baf2d4804f7aae1f88/coverage-7.10.7-cp312-cp312-win32.whl", hash = "sha256:77eb4c747061a6af8d0f7bdb31f1e108d172762ef579166ec84542f711d90256", size = 220699, upload-time = "2025-09-21T20:01:51.941Z" },
+    { url = "https://files.pythonhosted.org/packages/ca/f3/3bf7905288b45b075918d372498f1cf845b5b579b723c8fd17168018d5f5/coverage-7.10.7-cp312-cp312-win_amd64.whl", hash = "sha256:f51328ffe987aecf6d09f3cd9d979face89a617eacdaea43e7b3080777f647ba", size = 221512, upload-time = "2025-09-21T20:01:53.481Z" },
+    { url = "https://files.pythonhosted.org/packages/5c/44/3e32dbe933979d05cf2dac5e697c8599cfe038aaf51223ab901e208d5a62/coverage-7.10.7-cp312-cp312-win_arm64.whl", hash = "sha256:bda5e34f8a75721c96085903c6f2197dc398c20ffd98df33f866a9c8fd95f4bf", size = 220147, upload-time = "2025-09-21T20:01:55.2Z" },
     { url = "https://files.pythonhosted.org/packages/ec/16/114df1c291c22cac3b0c127a73e0af5c12ed7bbb6558d310429a0ae24023/coverage-7.10.7-py3-none-any.whl", hash = "sha256:f7941f6f2fe6dd6807a1208737b8a0cbcf1cc6d7b07d24998ad2d63590868260", size = 209952, upload-time = "2025-09-21T20:03:53.918Z" },
 ]
 
@@ -93,7 +104,7 @@ name = "dependency-groups"
 version = "1.3.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "packaging", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
+    { name = "packaging", marker = "(python_full_version < '3.12' and sys_platform == 'linux') or (python_full_version < '3.12' and sys_platform == 'win32')" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/62/55/f054de99871e7beb81935dea8a10b90cd5ce42122b1c3081d5282fdb3621/dependency_groups-1.3.1.tar.gz", hash = "sha256:78078301090517fd938c19f64a53ce98c32834dfe0dee6b88004a569a6adfefd", size = 10093, upload-time = "2025-05-02T00:34:29.452Z" }
 wheels = [
@@ -141,10 +152,10 @@ name = "hatchling"
 version = "1.27.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "packaging", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-    { name = "pathspec", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-    { name = "pluggy", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-    { name = "trove-classifiers", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
+    { name = "packaging", marker = "(python_full_version < '3.12' and sys_platform == 'linux') or (python_full_version < '3.12' and sys_platform == 'win32')" },
+    { name = "pathspec", marker = "(python_full_version < '3.12' and sys_platform == 'linux') or (python_full_version < '3.12' and sys_platform == 'win32')" },
+    { name = "pluggy", marker = "(python_full_version < '3.12' and sys_platform == 'linux') or (python_full_version < '3.12' and sys_platform == 'win32')" },
+    { name = "trove-classifiers", marker = "(python_full_version < '3.12' and sys_platform == 'linux') or (python_full_version < '3.12' and sys_platform == 'win32')" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/8f/8a/cc1debe3514da292094f1c3a700e4ca25442489731ef7c0814358816bb03/hatchling-1.27.0.tar.gz", hash = "sha256:971c296d9819abb3811112fc52c7a9751c8d381898f36533bb16f9791e941fd6", size = 54983, upload-time = "2024-12-15T17:08:11.894Z" }
 wheels = [
@@ -174,7 +185,7 @@ name = "markdown-it-py"
 version = "4.0.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "mdurl", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
+    { name = "mdurl", marker = "(python_full_version < '3.12' and sys_platform == 'linux') or (python_full_version < '3.12' and sys_platform == 'win32')" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/5b/f5/4ec618ed16cc4f8fb3b701563655a69816155e79e24a17b651541804721d/markdown_it_py-4.0.0.tar.gz", hash = "sha256:cb0a2b4aa34f932c007117b194e945bd74e0ec24133ceb5bac59009cda1cb9f3", size = 73070, upload-time = "2025-08-11T12:57:52.854Z" }
 wheels = [
@@ -191,13 +202,31 @@ wheels = [
 ]
 
 [[package]]
+name = "msgspec"
+version = "0.19.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/cf/9b/95d8ce458462b8b71b8a70fa94563b2498b89933689f3a7b8911edfae3d7/msgspec-0.19.0.tar.gz", hash = "sha256:604037e7cd475345848116e89c553aa9a233259733ab51986ac924ab1b976f8e", size = 216934, upload-time = "2024-12-27T17:40:28.597Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/81/25/3a4b24d468203d8af90d1d351b77ea3cffb96b29492855cf83078f16bfe4/msgspec-0.19.0-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:e78f46ff39a427e10b4a61614a2777ad69559cc8d603a7c05681f5a595ea98f7", size = 209029, upload-time = "2024-12-27T17:39:35.023Z" },
+    { url = "https://files.pythonhosted.org/packages/85/2e/db7e189b57901955239f7689b5dcd6ae9458637a9c66747326726c650523/msgspec-0.19.0-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:6c7adf191e4bd3be0e9231c3b6dc20cf1199ada2af523885efc2ed218eafd011", size = 210682, upload-time = "2024-12-27T17:39:36.384Z" },
+    { url = "https://files.pythonhosted.org/packages/03/97/7c8895c9074a97052d7e4a1cc1230b7b6e2ca2486714eb12c3f08bb9d284/msgspec-0.19.0-cp311-cp311-musllinux_1_2_aarch64.whl", hash = "sha256:f04cad4385e20be7c7176bb8ae3dca54a08e9756cfc97bcdb4f18560c3042063", size = 214003, upload-time = "2024-12-27T17:39:39.097Z" },
+    { url = "https://files.pythonhosted.org/packages/61/61/e892997bcaa289559b4d5869f066a8021b79f4bf8e955f831b095f47a4cd/msgspec-0.19.0-cp311-cp311-musllinux_1_2_x86_64.whl", hash = "sha256:45c8fb410670b3b7eb884d44a75589377c341ec1392b778311acdbfa55187716", size = 216833, upload-time = "2024-12-27T17:39:41.203Z" },
+    { url = "https://files.pythonhosted.org/packages/ce/3d/71b2dffd3a1c743ffe13296ff701ee503feaebc3f04d0e75613b6563c374/msgspec-0.19.0-cp311-cp311-win_amd64.whl", hash = "sha256:70eaef4934b87193a27d802534dc466778ad8d536e296ae2f9334e182ac27b6c", size = 186184, upload-time = "2024-12-27T17:39:43.702Z" },
+    { url = "https://files.pythonhosted.org/packages/87/81/0c8c93f0b92c97e326b279795f9c5b956c5a97af28ca0fbb9fd86c83737a/msgspec-0.19.0-cp312-cp312-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:4cfc033c02c3e0aec52b71710d7f84cb3ca5eb407ab2ad23d75631153fdb1f12", size = 210633, upload-time = "2024-12-27T17:39:49.099Z" },
+    { url = "https://files.pythonhosted.org/packages/d0/ef/c5422ce8af73928d194a6606f8ae36e93a52fd5e8df5abd366903a5ca8da/msgspec-0.19.0-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:d911c442571605e17658ca2b416fd8579c5050ac9adc5e00c2cb3126c97f73bc", size = 213594, upload-time = "2024-12-27T17:39:51.204Z" },
+    { url = "https://files.pythonhosted.org/packages/19/2b/4137bc2ed45660444842d042be2cf5b18aa06efd2cda107cff18253b9653/msgspec-0.19.0-cp312-cp312-musllinux_1_2_aarch64.whl", hash = "sha256:757b501fa57e24896cf40a831442b19a864f56d253679f34f260dcb002524a6c", size = 214053, upload-time = "2024-12-27T17:39:52.866Z" },
+    { url = "https://files.pythonhosted.org/packages/9d/e6/8ad51bdc806aac1dc501e8fe43f759f9ed7284043d722b53323ea421c360/msgspec-0.19.0-cp312-cp312-musllinux_1_2_x86_64.whl", hash = "sha256:5f0f65f29b45e2816d8bded36e6b837a4bf5fb60ec4bc3c625fa2c6da4124537", size = 219081, upload-time = "2024-12-27T17:39:55.142Z" },
+    { url = "https://files.pythonhosted.org/packages/b1/ef/27dd35a7049c9a4f4211c6cd6a8c9db0a50647546f003a5867827ec45391/msgspec-0.19.0-cp312-cp312-win_amd64.whl", hash = "sha256:067f0de1c33cfa0b6a8206562efdf6be5985b988b53dd244a8e06f993f27c8c0", size = 187467, upload-time = "2024-12-27T17:39:56.531Z" },
+]
+
+[[package]]
 name = "mypy"
 version = "1.18.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "mypy-extensions", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-    { name = "pathspec", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-    { name = "typing-extensions", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
+    { name = "mypy-extensions", marker = "(python_full_version < '3.12' and sys_platform == 'linux') or (python_full_version < '3.12' and sys_platform == 'win32')" },
+    { name = "pathspec", marker = "(python_full_version < '3.12' and sys_platform == 'linux') or (python_full_version < '3.12' and sys_platform == 'win32')" },
+    { name = "typing-extensions", marker = "(python_full_version < '3.12' and sys_platform == 'linux') or (python_full_version < '3.12' and sys_platform == 'win32')" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/c0/77/8f0d0001ffad290cef2f7f216f96c814866248a0b92a722365ed54648e7e/mypy-1.18.2.tar.gz", hash = "sha256:06a398102a5f203d7477b2923dda3634c36727fa5c237d8f859ef90c42a9924b", size = 3448846, upload-time = "2025-09-19T00:11:10.519Z" }
 wheels = [
@@ -205,6 +234,10 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/1a/52/ec4a061dd599eb8179d5411d99775bec2a20542505988f40fc2fee781068/mypy-1.18.2-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:1331eb7fd110d60c24999893320967594ff84c38ac6d19e0a76c5fd809a84c86", size = 13163750, upload-time = "2025-09-19T00:09:51.472Z" },
     { url = "https://files.pythonhosted.org/packages/c4/5f/2cf2ceb3b36372d51568f2208c021870fe7834cf3186b653ac6446511839/mypy-1.18.2-cp311-cp311-musllinux_1_2_x86_64.whl", hash = "sha256:3ca30b50a51e7ba93b00422e486cbb124f1c56a535e20eff7b2d6ab72b3b2e37", size = 13351827, upload-time = "2025-09-19T00:09:58.311Z" },
     { url = "https://files.pythonhosted.org/packages/c8/7d/2697b930179e7277529eaaec1513f8de622818696857f689e4a5432e5e27/mypy-1.18.2-cp311-cp311-win_amd64.whl", hash = "sha256:664dc726e67fa54e14536f6e1224bcfce1d9e5ac02426d2326e2bb4e081d1ce8", size = 9757983, upload-time = "2025-09-19T00:10:09.071Z" },
+    { url = "https://files.pythonhosted.org/packages/5f/a9/b29de53e42f18e8cc547e38daa9dfa132ffdc64f7250e353f5c8cdd44bee/mypy-1.18.2-cp312-cp312-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:5d6c838e831a062f5f29d11c9057c6009f60cb294fea33a98422688181fe2893", size = 12465585, upload-time = "2025-09-19T00:10:33.005Z" },
+    { url = "https://files.pythonhosted.org/packages/77/ae/6c3d2c7c61ff21f2bee938c917616c92ebf852f015fb55917fd6e2811db2/mypy-1.18.2-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:01199871b6110a2ce984bde85acd481232d17413868c9807e95c1b0739a58914", size = 13348562, upload-time = "2025-09-19T00:10:11.51Z" },
+    { url = "https://files.pythonhosted.org/packages/4d/31/aec68ab3b4aebdf8f36d191b0685d99faa899ab990753ca0fee60fb99511/mypy-1.18.2-cp312-cp312-musllinux_1_2_x86_64.whl", hash = "sha256:a2afc0fa0b0e91b4599ddfe0f91e2c26c2b5a5ab263737e998d6817874c5f7c8", size = 13533296, upload-time = "2025-09-19T00:10:06.568Z" },
+    { url = "https://files.pythonhosted.org/packages/9f/83/abcb3ad9478fca3ebeb6a5358bb0b22c95ea42b43b7789c7fb1297ca44f4/mypy-1.18.2-cp312-cp312-win_amd64.whl", hash = "sha256:d8068d0afe682c7c4897c0f7ce84ea77f6de953262b12d07038f4d296d547074", size = 9828828, upload-time = "2025-09-19T00:10:28.203Z" },
     { url = "https://files.pythonhosted.org/packages/87/e3/be76d87158ebafa0309946c4a73831974d4d6ab4f4ef40c3b53a385a66fd/mypy-1.18.2-py3-none-any.whl", hash = "sha256:22a1748707dd62b58d2ae53562ffc4d7f8bcc727e8ac7cbc69c053ddc874d47e", size = 2352367, upload-time = "2025-09-19T00:10:15.489Z" },
 ]
 
@@ -231,12 +264,12 @@ name = "nox"
 version = "2025.5.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "argcomplete", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-    { name = "attrs", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-    { name = "colorlog", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-    { name = "dependency-groups", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-    { name = "packaging", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-    { name = "virtualenv", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
+    { name = "argcomplete", marker = "(python_full_version < '3.12' and sys_platform == 'linux') or (python_full_version < '3.12' and sys_platform == 'win32')" },
+    { name = "attrs", marker = "(python_full_version < '3.12' and sys_platform == 'linux') or (python_full_version < '3.12' and sys_platform == 'win32')" },
+    { name = "colorlog", marker = "(python_full_version < '3.12' and sys_platform == 'linux') or (python_full_version < '3.12' and sys_platform == 'win32')" },
+    { name = "dependency-groups", marker = "(python_full_version < '3.12' and sys_platform == 'linux') or (python_full_version < '3.12' and sys_platform == 'win32')" },
+    { name = "packaging", marker = "(python_full_version < '3.12' and sys_platform == 'linux') or (python_full_version < '3.12' and sys_platform == 'win32')" },
+    { name = "virtualenv", marker = "(python_full_version < '3.12' and sys_platform == 'linux') or (python_full_version < '3.12' and sys_platform == 'win32')" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/b4/80/47712208c410defec169992e57c179f0f4d92f5dd17ba8daca50a8077e23/nox-2025.5.1.tar.gz", hash = "sha256:2a571dfa7a58acc726521ac3cd8184455ebcdcbf26401c7b737b5bc6701427b2", size = 4023334, upload-time = "2025-05-01T16:35:48.056Z" }
 wheels = [
@@ -284,11 +317,11 @@ name = "pre-commit"
 version = "4.3.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "cfgv", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-    { name = "identify", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-    { name = "nodeenv", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-    { name = "pyyaml", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-    { name = "virtualenv", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
+    { name = "cfgv", marker = "(python_full_version < '3.12' and sys_platform == 'linux') or (python_full_version < '3.12' and sys_platform == 'win32')" },
+    { name = "identify", marker = "(python_full_version < '3.12' and sys_platform == 'linux') or (python_full_version < '3.12' and sys_platform == 'win32')" },
+    { name = "nodeenv", marker = "(python_full_version < '3.12' and sys_platform == 'linux') or (python_full_version < '3.12' and sys_platform == 'win32')" },
+    { name = "pyyaml", marker = "(python_full_version < '3.12' and sys_platform == 'linux') or (python_full_version < '3.12' and sys_platform == 'win32')" },
+    { name = "virtualenv", marker = "(python_full_version < '3.12' and sys_platform == 'linux') or (python_full_version < '3.12' and sys_platform == 'win32')" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/ff/29/7cf5bbc236333876e4b41f56e06857a87937ce4bf91e117a6991a2dbb02a/pre_commit-4.3.0.tar.gz", hash = "sha256:499fe450cc9d42e9d58e606262795ecb64dd05438943c62b66f6a8673da30b16", size = 193792, upload-time = "2025-08-09T18:56:14.651Z" }
 wheels = [
@@ -309,39 +342,43 @@ name = "pytaf"
 version = "0.0.0a1"
 source = { editable = "." }
 dependencies = [
-    { name = "click", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-    { name = "platformdirs", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-    { name = "rich", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-    { name = "tomli-w", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-    { name = "typer", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
+    { name = "click", marker = "(python_full_version < '3.12' and sys_platform == 'linux') or (python_full_version < '3.12' and sys_platform == 'win32')" },
+    { name = "msgspec", marker = "(python_full_version < '3.12' and sys_platform == 'linux') or (python_full_version < '3.12' and sys_platform == 'win32')" },
+    { name = "platformdirs", marker = "(python_full_version < '3.12' and sys_platform == 'linux') or (python_full_version < '3.12' and sys_platform == 'win32')" },
+    { name = "rich", marker = "(python_full_version < '3.12' and sys_platform == 'linux') or (python_full_version < '3.12' and sys_platform == 'win32')" },
+    { name = "tomli-w", marker = "(python_full_version < '3.12' and sys_platform == 'linux') or (python_full_version < '3.12' and sys_platform == 'win32')" },
+    { name = "typer", marker = "(python_full_version < '3.12' and sys_platform == 'linux') or (python_full_version < '3.12' and sys_platform == 'win32')" },
+    { name = "typing-extensions", marker = "(python_full_version < '3.12' and sys_platform == 'linux') or (python_full_version < '3.12' and sys_platform == 'win32')" },
 ]
 
 [package.optional-dependencies]
 dev = [
-    { name = "coverage", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-    { name = "editables", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-    { name = "hatchling", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-    { name = "mypy", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-    { name = "nox", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-    { name = "pre-commit", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-    { name = "pytest", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-    { name = "pytest-randomly", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-    { name = "pytest-xdist", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-    { name = "ruff", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
+    { name = "coverage", marker = "(python_full_version < '3.12' and sys_platform == 'linux') or (python_full_version < '3.12' and sys_platform == 'win32')" },
+    { name = "editables", marker = "(python_full_version < '3.12' and sys_platform == 'linux') or (python_full_version < '3.12' and sys_platform == 'win32')" },
+    { name = "hatchling", marker = "(python_full_version < '3.12' and sys_platform == 'linux') or (python_full_version < '3.12' and sys_platform == 'win32')" },
+    { name = "mypy", marker = "(python_full_version < '3.12' and sys_platform == 'linux') or (python_full_version < '3.12' and sys_platform == 'win32')" },
+    { name = "nox", marker = "(python_full_version < '3.12' and sys_platform == 'linux') or (python_full_version < '3.12' and sys_platform == 'win32')" },
+    { name = "pre-commit", marker = "(python_full_version < '3.12' and sys_platform == 'linux') or (python_full_version < '3.12' and sys_platform == 'win32')" },
+    { name = "pytest", marker = "(python_full_version < '3.12' and sys_platform == 'linux') or (python_full_version < '3.12' and sys_platform == 'win32')" },
+    { name = "pytest-randomly", marker = "(python_full_version < '3.12' and sys_platform == 'linux') or (python_full_version < '3.12' and sys_platform == 'win32')" },
+    { name = "pytest-timeout", marker = "(python_full_version < '3.12' and sys_platform == 'linux') or (python_full_version < '3.12' and sys_platform == 'win32')" },
+    { name = "pytest-xdist", marker = "(python_full_version < '3.12' and sys_platform == 'linux') or (python_full_version < '3.12' and sys_platform == 'win32')" },
+    { name = "ruff", marker = "(python_full_version < '3.12' and sys_platform == 'linux') or (python_full_version < '3.12' and sys_platform == 'win32')" },
 ]
 
 [package.dev-dependencies]
 dev = [
-    { name = "coverage", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-    { name = "editables", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-    { name = "hatchling", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-    { name = "mypy", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-    { name = "nox", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-    { name = "pre-commit", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-    { name = "pytest", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-    { name = "pytest-randomly", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-    { name = "pytest-xdist", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-    { name = "ruff", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
+    { name = "coverage", marker = "(python_full_version < '3.12' and sys_platform == 'linux') or (python_full_version < '3.12' and sys_platform == 'win32')" },
+    { name = "editables", marker = "(python_full_version < '3.12' and sys_platform == 'linux') or (python_full_version < '3.12' and sys_platform == 'win32')" },
+    { name = "hatchling", marker = "(python_full_version < '3.12' and sys_platform == 'linux') or (python_full_version < '3.12' and sys_platform == 'win32')" },
+    { name = "mypy", marker = "(python_full_version < '3.12' and sys_platform == 'linux') or (python_full_version < '3.12' and sys_platform == 'win32')" },
+    { name = "nox", marker = "(python_full_version < '3.12' and sys_platform == 'linux') or (python_full_version < '3.12' and sys_platform == 'win32')" },
+    { name = "pre-commit", marker = "(python_full_version < '3.12' and sys_platform == 'linux') or (python_full_version < '3.12' and sys_platform == 'win32')" },
+    { name = "pytest", marker = "(python_full_version < '3.12' and sys_platform == 'linux') or (python_full_version < '3.12' and sys_platform == 'win32')" },
+    { name = "pytest-randomly", marker = "(python_full_version < '3.12' and sys_platform == 'linux') or (python_full_version < '3.12' and sys_platform == 'win32')" },
+    { name = "pytest-timeout", marker = "(python_full_version < '3.12' and sys_platform == 'linux') or (python_full_version < '3.12' and sys_platform == 'win32')" },
+    { name = "pytest-xdist", marker = "(python_full_version < '3.12' and sys_platform == 'linux') or (python_full_version < '3.12' and sys_platform == 'win32')" },
+    { name = "ruff", marker = "(python_full_version < '3.12' and sys_platform == 'linux') or (python_full_version < '3.12' and sys_platform == 'win32')" },
 ]
 
 [package.metadata]
@@ -350,17 +387,20 @@ requires-dist = [
     { name = "coverage", marker = "extra == 'dev'", specifier = ">=7.6.0" },
     { name = "editables", marker = "extra == 'dev'", specifier = ">=0.5" },
     { name = "hatchling", marker = "extra == 'dev'", specifier = ">=1.25.0" },
+    { name = "msgspec", specifier = ">=0.19.0" },
     { name = "mypy", marker = "extra == 'dev'", specifier = ">=1.11.2" },
     { name = "nox", marker = "extra == 'dev'", specifier = ">=2024.4.15" },
     { name = "platformdirs", specifier = ">=4.2.0" },
     { name = "pre-commit", marker = "extra == 'dev'", specifier = ">=3.7.0" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.2.0" },
     { name = "pytest-randomly", marker = "extra == 'dev'", specifier = ">=3.15.0" },
+    { name = "pytest-timeout", marker = "extra == 'dev'", specifier = ">=2.4.0" },
     { name = "pytest-xdist", marker = "extra == 'dev'", specifier = ">=3.5.0" },
     { name = "rich", specifier = ">=13.7.0" },
-    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.6.9" },
+    { name = "ruff", marker = "extra == 'dev'", specifier = "==0.13.1" },
     { name = "tomli-w", specifier = ">=1.0.0" },
     { name = "typer", specifier = ">=0.12.0" },
+    { name = "typing-extensions", specifier = ">=4.15.0" },
 ]
 provides-extras = ["dev"]
 
@@ -374,8 +414,9 @@ dev = [
     { name = "pre-commit", specifier = ">=3.7.0" },
     { name = "pytest", specifier = ">=8.2.0" },
     { name = "pytest-randomly", specifier = ">=3.15.0" },
+    { name = "pytest-timeout", specifier = ">=2.4.0" },
     { name = "pytest-xdist", specifier = ">=3.5.0" },
-    { name = "ruff", specifier = ">=0.6.9" },
+    { name = "ruff", specifier = "==0.13.1" },
 ]
 
 [[package]]
@@ -383,11 +424,11 @@ name = "pytest"
 version = "8.4.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "colorama", marker = "sys_platform == 'win32'" },
-    { name = "iniconfig", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-    { name = "packaging", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-    { name = "pluggy", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-    { name = "pygments", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
+    { name = "colorama", marker = "python_full_version < '3.12' and sys_platform == 'win32'" },
+    { name = "iniconfig", marker = "(python_full_version < '3.12' and sys_platform == 'linux') or (python_full_version < '3.12' and sys_platform == 'win32')" },
+    { name = "packaging", marker = "(python_full_version < '3.12' and sys_platform == 'linux') or (python_full_version < '3.12' and sys_platform == 'win32')" },
+    { name = "pluggy", marker = "(python_full_version < '3.12' and sys_platform == 'linux') or (python_full_version < '3.12' and sys_platform == 'win32')" },
+    { name = "pygments", marker = "(python_full_version < '3.12' and sys_platform == 'linux') or (python_full_version < '3.12' and sys_platform == 'win32')" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/a3/5c/00a0e072241553e1a7496d638deababa67c5058571567b92a7eaa258397c/pytest-8.4.2.tar.gz", hash = "sha256:86c0d0b93306b961d58d62a4db4879f27fe25513d4b969df351abdddb3c30e01", size = 1519618, upload-time = "2025-09-04T14:34:22.711Z" }
 wheels = [
@@ -399,7 +440,7 @@ name = "pytest-randomly"
 version = "4.0.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "pytest", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
+    { name = "pytest", marker = "(python_full_version < '3.12' and sys_platform == 'linux') or (python_full_version < '3.12' and sys_platform == 'win32')" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/c4/1d/258a4bf1109258c00c35043f40433be5c16647387b6e7cd5582d638c116b/pytest_randomly-4.0.1.tar.gz", hash = "sha256:174e57bb12ac2c26f3578188490bd333f0e80620c3f47340158a86eca0593cd8", size = 14130, upload-time = "2025-09-12T15:23:00.085Z" }
 wheels = [
@@ -407,12 +448,24 @@ wheels = [
 ]
 
 [[package]]
+name = "pytest-timeout"
+version = "2.4.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "pytest", marker = "(python_full_version < '3.12' and sys_platform == 'linux') or (python_full_version < '3.12' and sys_platform == 'win32')" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/ac/82/4c9ecabab13363e72d880f2fb504c5f750433b2b6f16e99f4ec21ada284c/pytest_timeout-2.4.0.tar.gz", hash = "sha256:7e68e90b01f9eff71332b25001f85c75495fc4e3a836701876183c4bcfd0540a", size = 17973, upload-time = "2025-05-05T19:44:34.99Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/fa/b6/3127540ecdf1464a00e5a01ee60a1b09175f6913f0644ac748494d9c4b21/pytest_timeout-2.4.0-py3-none-any.whl", hash = "sha256:c42667e5cdadb151aeb5b26d114aff6bdf5a907f176a007a30b940d3d865b5c2", size = 14382, upload-time = "2025-05-05T19:44:33.502Z" },
+]
+
+[[package]]
 name = "pytest-xdist"
 version = "3.8.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "execnet", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-    { name = "pytest", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
+    { name = "execnet", marker = "(python_full_version < '3.12' and sys_platform == 'linux') or (python_full_version < '3.12' and sys_platform == 'win32')" },
+    { name = "pytest", marker = "(python_full_version < '3.12' and sys_platform == 'linux') or (python_full_version < '3.12' and sys_platform == 'win32')" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/78/b4/439b179d1ff526791eb921115fca8e44e596a13efeda518b9d845a619450/pytest_xdist-3.8.0.tar.gz", hash = "sha256:7e578125ec9bc6050861aa93f2d59f1d8d085595d6551c2c90b6f4fad8d3a9f1", size = 88069, upload-time = "2025-07-01T13:30:59.346Z" }
 wheels = [
@@ -432,6 +485,13 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/45/73/0f49dacd6e82c9430e46f4a027baa4ca205e8b0a9dce1397f44edc23559d/PyYAML-6.0.2-cp311-cp311-musllinux_1_1_x86_64.whl", hash = "sha256:797b4f722ffa07cc8d62053e4cff1486fa6dc094105d13fea7b1de7d8bf71c9e", size = 756638, upload-time = "2024-08-06T20:32:18.555Z" },
     { url = "https://files.pythonhosted.org/packages/22/5f/956f0f9fc65223a58fbc14459bf34b4cc48dec52e00535c79b8db361aabd/PyYAML-6.0.2-cp311-cp311-win32.whl", hash = "sha256:11d8f3dd2b9c1207dcaf2ee0bbbfd5991f571186ec9cc78427ba5bd32afae4b5", size = 143850, upload-time = "2024-08-06T20:32:19.889Z" },
     { url = "https://files.pythonhosted.org/packages/ed/23/8da0bbe2ab9dcdd11f4f4557ccaf95c10b9811b13ecced089d43ce59c3c8/PyYAML-6.0.2-cp311-cp311-win_amd64.whl", hash = "sha256:e10ce637b18caea04431ce14fabcf5c64a1c61ec9c56b071a4b7ca131ca52d44", size = 161980, upload-time = "2024-08-06T20:32:21.273Z" },
+    { url = "https://files.pythonhosted.org/packages/c3/93/9916574aa8c00aa06bbac729972eb1071d002b8e158bd0e83a3b9a20a1f7/PyYAML-6.0.2-cp312-cp312-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:1f71ea527786de97d1a0cc0eacd1defc0985dcf6b3f17bb77dcfc8c34bec4dc5", size = 739154, upload-time = "2024-08-06T20:32:28.363Z" },
+    { url = "https://files.pythonhosted.org/packages/95/0f/b8938f1cbd09739c6da569d172531567dbcc9789e0029aa070856f123984/PyYAML-6.0.2-cp312-cp312-manylinux_2_17_s390x.manylinux2014_s390x.whl", hash = "sha256:9b22676e8097e9e22e36d6b7bda33190d0d400f345f23d4065d48f4ca7ae0425", size = 766223, upload-time = "2024-08-06T20:32:30.058Z" },
+    { url = "https://files.pythonhosted.org/packages/b9/2b/614b4752f2e127db5cc206abc23a8c19678e92b23c3db30fc86ab731d3bd/PyYAML-6.0.2-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:80bab7bfc629882493af4aa31a4cfa43a4c57c83813253626916b8c7ada83476", size = 767542, upload-time = "2024-08-06T20:32:31.881Z" },
+    { url = "https://files.pythonhosted.org/packages/d4/00/dd137d5bcc7efea1836d6264f049359861cf548469d18da90cd8216cf05f/PyYAML-6.0.2-cp312-cp312-musllinux_1_1_aarch64.whl", hash = "sha256:0833f8694549e586547b576dcfaba4a6b55b9e96098b36cdc7ebefe667dfed48", size = 731164, upload-time = "2024-08-06T20:32:37.083Z" },
+    { url = "https://files.pythonhosted.org/packages/c9/1f/4f998c900485e5c0ef43838363ba4a9723ac0ad73a9dc42068b12aaba4e4/PyYAML-6.0.2-cp312-cp312-musllinux_1_1_x86_64.whl", hash = "sha256:8b9c7197f7cb2738065c481a0461e50ad02f18c78cd75775628afb4d7137fb3b", size = 756611, upload-time = "2024-08-06T20:32:38.898Z" },
+    { url = "https://files.pythonhosted.org/packages/df/d1/f5a275fdb252768b7a11ec63585bc38d0e87c9e05668a139fea92b80634c/PyYAML-6.0.2-cp312-cp312-win32.whl", hash = "sha256:ef6107725bd54b262d6dedcc2af448a266975032bc85ef0172c5f059da6325b4", size = 140591, upload-time = "2024-08-06T20:32:40.241Z" },
+    { url = "https://files.pythonhosted.org/packages/0c/e8/4f648c598b17c3d06e8753d7d13d57542b30d56e6c2dedf9c331ae56312e/PyYAML-6.0.2-cp312-cp312-win_amd64.whl", hash = "sha256:7e7401d0de89a9a855c839bc697c079a4af81cf878373abd7dc625847d25cbd8", size = 156338, upload-time = "2024-08-06T20:32:41.93Z" },
 ]
 
 [[package]]
@@ -439,8 +499,8 @@ name = "rich"
 version = "14.1.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "markdown-it-py", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-    { name = "pygments", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
+    { name = "markdown-it-py", marker = "(python_full_version < '3.12' and sys_platform == 'linux') or (python_full_version < '3.12' and sys_platform == 'win32')" },
+    { name = "pygments", marker = "(python_full_version < '3.12' and sys_platform == 'linux') or (python_full_version < '3.12' and sys_platform == 'win32')" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/fe/75/af448d8e52bf1d8fa6a9d089ca6c07ff4453d86c65c145d0a300bb073b9b/rich-14.1.0.tar.gz", hash = "sha256:e497a48b844b0320d45007cdebfeaeed8db2a4f4bcf49f15e455cfc4af11eaa8", size = 224441, upload-time = "2025-07-25T07:32:58.125Z" }
 wheels = [
@@ -503,10 +563,10 @@ name = "typer"
 version = "0.19.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "click", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-    { name = "rich", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-    { name = "shellingham", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-    { name = "typing-extensions", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
+    { name = "click", marker = "(python_full_version < '3.12' and sys_platform == 'linux') or (python_full_version < '3.12' and sys_platform == 'win32')" },
+    { name = "rich", marker = "(python_full_version < '3.12' and sys_platform == 'linux') or (python_full_version < '3.12' and sys_platform == 'win32')" },
+    { name = "shellingham", marker = "(python_full_version < '3.12' and sys_platform == 'linux') or (python_full_version < '3.12' and sys_platform == 'win32')" },
+    { name = "typing-extensions", marker = "(python_full_version < '3.12' and sys_platform == 'linux') or (python_full_version < '3.12' and sys_platform == 'win32')" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/21/ca/950278884e2ca20547ff3eb109478c6baf6b8cf219318e6bc4f666fad8e8/typer-0.19.2.tar.gz", hash = "sha256:9ad824308ded0ad06cc716434705f691d4ee0bfd0fb081839d2e426860e7fdca", size = 104755, upload-time = "2025-09-23T09:47:48.256Z" }
 wheels = [
@@ -527,9 +587,9 @@ name = "virtualenv"
 version = "20.34.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "distlib", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-    { name = "filelock", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-    { name = "platformdirs", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
+    { name = "distlib", marker = "(python_full_version < '3.12' and sys_platform == 'linux') or (python_full_version < '3.12' and sys_platform == 'win32')" },
+    { name = "filelock", marker = "(python_full_version < '3.12' and sys_platform == 'linux') or (python_full_version < '3.12' and sys_platform == 'win32')" },
+    { name = "platformdirs", marker = "(python_full_version < '3.12' and sys_platform == 'linux') or (python_full_version < '3.12' and sys_platform == 'win32')" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/1c/14/37fcdba2808a6c615681cd216fecae00413c9dab44fb2e57805ecf3eaee3/virtualenv-20.34.0.tar.gz", hash = "sha256:44815b2c9dee7ed86e387b842a84f20b93f7f417f95886ca1996a72a4138eb1a", size = 6003808, upload-time = "2025-08-13T14:24:07.464Z" }
 wheels = [
