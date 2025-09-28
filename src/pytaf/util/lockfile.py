@@ -1,31 +1,20 @@
 from __future__ import annotations
-
-from contextlib import suppress
 import os
 from pathlib import Path
-from typing import IO, Any
 
-IS_WIN: bool = os.name == "nt"
-
-# Best-effort import; use `Any` to silence missing attributes in type stubs.
-try:  # pragma: no cover
-    import msvcrt as _msvcrt
-    MSVCRT: Any | None = _msvcrt
-except Exception:  # pragma: no cover
-    MSVCRT = None
-
+IS_WIN = (os.name == "nt")
 
 class BrokerLock:
     """
     Single-byte advisory lock held exclusively by the broker while alive.
     Presence == broker alive for kill safety checks.
     """
-    def __init__(self, path: str) -> None:
-        self._path: Path = Path(path)
+    def __init__(self, path: str):
+        self._path = Path(path)
         self._path.parent.mkdir(parents=True, exist_ok=True)
         if not self._path.exists():
             self._path.write_bytes(b"")
-        self._fh: IO[bytes] | None = None
+        self._fh = None
 
     @property
     def path(self) -> Path:
@@ -34,61 +23,80 @@ class BrokerLock:
     def acquire_exclusive(self) -> None:
         if self._fh is not None:
             return
-        fh: IO[bytes] = open(self._path, "a+b")  # noqa: SIM115 (long-lived)
+        self._fh = open(self._path, "a+b")
         try:
-            if IS_WIN and MSVCRT is not None:
-                # Lock 1 byte non-blocking; use Any to avoid stub attribute errors.
-                MSVCRT.locking(fh.fileno(), MSVCRT.LK_NBLCK, 1)
+            if IS_WIN:
+                import msvcrt
+                try:
+                    msvcrt.locking(self._fh.fileno(), msvcrt.LK_NBLCK, 1)
+                except OSError:
+                    msvcrt.locking(self._fh.fileno(), msvcrt.LK_LOCK, 1)
+                    msvcrt.locking(self._fh.fileno(), msvcrt.LK_UNLCK, 1)
+                    msvcrt.locking(self._fh.fileno(), msvcrt.LK_NBLCK, 1)
             else:
-                import fcntl  # lazy import for POSIX
-                fcntl.flock(fh.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
-            self._fh = fh
-        except Exception:
+                import fcntl
+                fcntl.flock(self._fh.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except Exception as e:
             try:
-                fh.close()
-            finally:
+                self._fh.close()
+            except Exception:
                 pass
-            raise
+            self._fh = None
+            raise e
 
     def release(self) -> None:
-        fh = self._fh
-        if fh is None:
+        if self._fh is None:
             return
         try:
-            if IS_WIN and MSVCRT is not None:
-                MSVCRT.locking(fh.fileno(), MSVCRT.LK_UNLCK, 1)
+            if IS_WIN:
+                import msvcrt
+                try:
+                    msvcrt.locking(self._fh.fileno(), msvcrt.LK_UNLCK, 1)
+                except Exception:
+                    pass
             else:
-                import fcntl  # lazy import
-                fcntl.flock(fh.fileno(), fcntl.LOCK_UN)
+                import fcntl
+                try:
+                    fcntl.flock(self._fh.fileno(), fcntl.LOCK_UN)
+                except Exception:
+                    pass
         finally:
             try:
-                fh.close()
-            finally:
-                self._fh = None
-
+                self._fh.close()
+            except Exception:
+                pass
+            self._fh = None
 
 def try_nonblocking_exclusive_lock(path: Path) -> bool:
     """
     Attempt to acquire an exclusive, non-blocking lock on `path`.
     Returns True if lock acquired (i.e., no one holds it), False if already locked.
     """
-    fh: IO[bytes] = open(path, "a+b")  # noqa: SIM115
+    fh = open(path, "a+b")
     try:
-        if IS_WIN and MSVCRT is not None:
+        if IS_WIN:
+            import msvcrt
             try:
-                MSVCRT.locking(fh.fileno(), MSVCRT.LK_NBLCK, 1)
-                MSVCRT.locking(fh.fileno(), MSVCRT.LK_UNLCK, 1)
+                msvcrt.locking(fh.fileno(), msvcrt.LK_NBLCK, 1)
+                msvcrt.locking(fh.fileno(), msvcrt.LK_UNLCK, 1)
+                fh.close()
                 return True
-            except Exception:
+            except OSError:
+                fh.close()
                 return False
         else:
             import fcntl
             try:
                 fcntl.flock(fh.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
                 fcntl.flock(fh.fileno(), fcntl.LOCK_UN)
+                fh.close()
                 return True
             except BlockingIOError:
+                fh.close()
                 return False
-    finally:
-        with suppress(Exception):
+    except Exception:
+        try:
             fh.close()
+        except Exception:
+            pass
+        return False

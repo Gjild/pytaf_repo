@@ -1,16 +1,11 @@
 from __future__ import annotations
-
-import os
-import struct
-import time
-from typing import Any, Literal, TypedDict, cast
-
+import os, struct, time
+from typing import Literal, Optional, TypedDict
 import msgspec
 
 MAGIC = b"PTAF"
 VERSION = 1
 _HDR = struct.Struct(">4sBIQ")  # magic(4), ver(u8), len(u32), mono_ns(u64)
-
 
 def _max_body() -> int:
     try:
@@ -19,43 +14,37 @@ def _max_body() -> int:
     except Exception:
         return 8 * 1024 * 1024
 
-
 class OpMsg(TypedDict, total=False):
-    op: Literal["open", "close", "xact", "ping", "shutdown", "flush"]
+    op: Literal["open","close","xact","ping","shutdown","flush"]
     epoch_id: int
     op_id: int
-    resource: str | None
-    lane: Literal["control", "bulk"] | None
-    payload: bytes | None
-
+    resource: Optional[str]
+    lane: Optional[Literal["control","bulk"]]
+    payload: Optional[bytes]
 
 class AckMsg(TypedDict, total=False):
     ok: bool
     op_id: int
     epoch_id: int
     ipc_version: int
-    diag: dict[str, Any] | None
-    payload: bytes | None
-    error: str | None
-
+    diag: Optional[dict]
+    payload: Optional[bytes]
+    error: Optional[str]
 
 _enc = msgspec.msgpack.Encoder()
 _dec = msgspec.msgpack.Decoder()
 
-
 def now_mono_ns() -> int:
     return time.monotonic_ns()
 
-
-def write_msg(fd: int, payload: dict[str, Any]) -> None:
+def write_msg(fd: int, payload: dict) -> None:
     body = _enc.encode(payload)
     if len(body) > _max_body():
         raise ValueError("ipc: payload too large")
     os.write(fd, _HDR.pack(MAGIC, VERSION, len(body), now_mono_ns()))
     os.write(fd, body)
 
-
-def read_msg(fd: int) -> dict[str, Any]:
+def read_msg(fd: int) -> dict:
     hdr = _read_exact(fd, _HDR.size)
     magic, ver, n, mono = _HDR.unpack(hdr)
     if magic != MAGIC or ver != VERSION:
@@ -63,10 +52,9 @@ def read_msg(fd: int) -> dict[str, Any]:
     if n > _max_body():
         raise RuntimeError("ipc: body too large")
     body = _read_exact(fd, n)
-    msg = cast(dict[str, Any], _dec.decode(body))
+    msg = _dec.decode(body)
     msg["_mono_ns"] = mono
     return msg
-
 
 def _read_exact(fd: int, n: int) -> bytes:
     buf = bytearray()

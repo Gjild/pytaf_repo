@@ -1,10 +1,7 @@
 from __future__ import annotations
-
 import hashlib
 from pathlib import Path
-
 from .win_durability import flush_dir_anchor_if_windows
-
 
 def put_blob(root: Path, data: bytes) -> tuple[str, Path]:
     h = hashlib.sha256(data).hexdigest()

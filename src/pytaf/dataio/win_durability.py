@@ -1,10 +1,8 @@
 from __future__ import annotations
-
 import os
 from pathlib import Path
 
-IS_WIN = os.name == "nt"
-
+IS_WIN = (os.name == "nt")
 
 def flush_dir_anchor_if_windows(path: Path) -> None:
     if not IS_WIN:

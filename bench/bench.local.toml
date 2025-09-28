@@ -3,7 +3,7 @@ bench_id = "local_bench"
 project = "scratch"
 
 [results]
-root = "/home/mikkel.baumannjorgen/.local/share/pytaf"
+root = "/home/miba/.local/share/pytaf"
 excel_safe_csv = true
 
 [resources]

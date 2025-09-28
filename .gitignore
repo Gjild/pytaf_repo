@@ -19,3 +19,4 @@ wheelhouse/
 .DS_Store
 .coverage
 coverage.xml
+project_tree.py

@@ -1,11 +1,9 @@
 from __future__ import annotations
-
 import errno
 import os
 from pathlib import Path
-import tomllib
-from typing import Annotated
 
+import tomllib
 import typer
 
 from pytaf.run.runner import run as run_cmd
@@ -14,22 +12,25 @@ from pytaf.util.fs import scan_stale_tmps
 
 app = typer.Typer(add_completion=False)
 
-@app.command()
-def main(
-    bench: Annotated[
-        Path, typer.Option("--bench", help="Bench TOML path")
-    ] = Path("bench/bench.local.toml"),
-    acknowledge_stale: Annotated[
-        bool,
-        typer.Option("--acknowledge-stale", help="Proceed if stale temp files exist in results root"),
-    ] = False,
+
+@app.callback(invoke_without_command=True)
+def run_root(
+    bench: Path = typer.Option(
+        Path("bench/bench.local.toml"), "--bench", help="Bench TOML path"
+    ),
+    acknowledge_stale: bool = typer.Option(
+        False, "--acknowledge-stale", help="Proceed if stale temp files exist in results root"
+    ),
 ) -> None:
+    """
+    Run the Phase 1 echo vertical slice and emit durable artifacts.
+    """
     try:
         with bench.open("rb") as f:
             cfg = tomllib.load(f)
     except Exception as e:
         typer.echo(f"ConfigError(22): {e}")
-        raise typer.Exit(22) from e
+        raise typer.Exit(22)
 
     if "results" not in cfg or "root" not in cfg["results"]:
         typer.echo('ConfigError(22): missing [results].root')
@@ -41,6 +42,7 @@ def main(
         declared_root if declared_root.is_absolute() else (base / declared_root)
     ).resolve()
 
+    # Cloud-path relocation (name-based heuristics).
     resolved_root, relocated_cloud, relto_cloud, cloud_detected = ensure_local_results_root(
         resolved_declared
     )
@@ -51,6 +53,7 @@ def main(
         banner_shown = True
         relocation_path = str(relto_cloud)
 
+    # Stale temp gate.
     stale = scan_stale_tmps(resolved_root)
     if stale and not acknowledge_stale:
         typer.echo("Stale temporary files detected in results root:")
@@ -59,6 +62,7 @@ def main(
         typer.echo("Refusing to run. Re-run with --acknowledge-stale to proceed.")
         raise typer.Exit(28)
 
+    # Writability probe; on denial relocate to a machine-local cache.
     relocated_runtime = False
     permission_denied_relocated = False
     if not os.access(resolved_root, os.W_OK):
@@ -70,7 +74,10 @@ def main(
             testfile.unlink(missing_ok=True)
             probedir.rmdir()
         except (PermissionError, OSError) as e:
-            if isinstance(e, PermissionError) or getattr(e, "errno", None) in (errno.EACCES, errno.EPERM):
+            if isinstance(e, PermissionError) or getattr(e, "errno", None) in (
+                errno.EACCES,
+                errno.EPERM,
+            ):
                 if os.name == "nt":
                     relto = Path(os.environ.get("PROGRAMDATA", r"C:\ProgramData")) / "PyTAF" / "cache"
                 else:
@@ -84,7 +91,7 @@ def main(
                 relocation_path = str(relto)
             else:
                 typer.echo(f"TransportError(23): write probe failed: {e}")
-                raise typer.Exit(23) from e
+                raise typer.Exit(23)
 
     cfg["results"]["root"] = str(resolved_root)
 
@@ -96,5 +103,11 @@ def main(
         "cloud_path_detected": bool(cloud_detected),
         "permission_denied_relocated": bool(permission_denied_relocated),
     }
+
     code = run_cmd(resolved_root, cfg, meta)
     raise typer.Exit(code)
+
+
+if __name__ == "__main__":
+    # Allow: python -m pytaf.cli.run
+    app()
