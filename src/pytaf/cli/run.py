@@ -1,9 +1,11 @@
 from __future__ import annotations
+
 import errno
 import os
 from pathlib import Path
-
 import tomllib
+from typing import Annotated, Any
+
 import typer
 
 from pytaf.run.runner import run as run_cmd
@@ -15,12 +17,10 @@ app = typer.Typer(add_completion=False)
 
 @app.callback(invoke_without_command=True)
 def run_root(
-    bench: Path = typer.Option(
-        Path("bench/bench.local.toml"), "--bench", help="Bench TOML path"
-    ),
-    acknowledge_stale: bool = typer.Option(
-        False, "--acknowledge-stale", help="Proceed if stale temp files exist in results root"
-    ),
+    bench: Annotated[Path, typer.Option("--bench", help="Bench TOML path")] = Path("bench/bench.local.toml"),
+    acknowledge_stale: Annotated[
+        bool, typer.Option("--acknowledge-stale", help="Proceed if stale temp files exist in results root")
+    ] = False,
 ) -> None:
     """
     Run the Phase 1 echo vertical slice and emit durable artifacts.
@@ -30,22 +30,18 @@ def run_root(
             cfg = tomllib.load(f)
     except Exception as e:
         typer.echo(f"ConfigError(22): {e}")
-        raise typer.Exit(22)
+        raise typer.Exit(22) from e
 
     if "results" not in cfg or "root" not in cfg["results"]:
-        typer.echo('ConfigError(22): missing [results].root')
+        typer.echo("ConfigError(22): missing [results].root")
         raise typer.Exit(22)
 
     base = bench.parent.resolve()
     declared_root = Path(cfg["results"]["root"])
-    resolved_declared = (
-        declared_root if declared_root.is_absolute() else (base / declared_root)
-    ).resolve()
+    resolved_declared = (declared_root if declared_root.is_absolute() else (base / declared_root)).resolve()
 
     # Cloud-path relocation (name-based heuristics).
-    resolved_root, relocated_cloud, relto_cloud, cloud_detected = ensure_local_results_root(
-        resolved_declared
-    )
+    resolved_root, relocated_cloud, relto_cloud, cloud_detected = ensure_local_results_root(resolved_declared)
     banner_shown = False
     relocation_path = ""
     if relocated_cloud:
@@ -91,11 +87,11 @@ def run_root(
                 relocation_path = str(relto)
             else:
                 typer.echo(f"TransportError(23): write probe failed: {e}")
-                raise typer.Exit(23)
+                raise typer.Exit(23) from e
 
     cfg["results"]["root"] = str(resolved_root)
 
-    meta = {
+    meta: dict[str, Any] = {
         "relocated": bool(relocated_cloud or relocated_runtime),
         "relocation_path": relocation_path,
         "banner_shown": banner_shown,

@@ -1,10 +1,19 @@
 from __future__ import annotations
-from pathlib import Path
-import json, platform, time, os
-from .win_durability import flush_dir_anchor_if_windows
-from .durability import atomic_open
 
-def write_headers(run_dir: Path, bench_cfg: dict, *, ipc_version: int, epoch_id: int, ipc_handshake_ok: bool) -> None:
+import json
+import os
+from pathlib import Path
+import platform
+import time
+from typing import Any
+
+from .durability import atomic_open
+from .win_durability import flush_dir_anchor_if_windows
+
+
+def write_headers(
+    run_dir: Path, bench_cfg: dict[str, Any], *, ipc_version: int, epoch_id: int, ipc_handshake_ok: bool
+) -> None:
     hdr = {
         "schema": "results.header.v1",
         "run_uuid": run_dir.name,
@@ -23,5 +32,6 @@ def write_headers(run_dir: Path, bench_cfg: dict, *, ipc_version: int, epoch_id:
         f.write(json.dumps(hdr, indent=2).encode("utf-8"))
     flush_dir_anchor_if_windows(run_dir)
 
+
 def _shell_hint() -> str:
-    return (platform.system() + " " + (os.environ.get("SHELL") or os.environ.get("ComSpec") or "")).strip()
+    return (platform.system() + " " + (os.environ.get("SHELL") or os.environ.get("COMSPEC") or "")).strip()

@@ -1,18 +1,22 @@
-import sys, subprocess, json
+import json
 from pathlib import Path
+import subprocess
+import sys
+
 
 def _run_pytaf_run(cwd: Path) -> int:
     return subprocess.run([sys.executable, "-m", "pytaf.cli.run", "--bench", "bench/bench.local.toml"],
                           cwd=cwd).returncode
 
 def test_run_creates_artifacts(tmp_path: Path):
-    bench = tmp_path / "bench"; bench.mkdir()
-    (bench/"bench.local.toml").write_text(
-        'schema_version="bench.v1"\n[results]\nroot="%s"\n' % tmp_path.as_posix(),
-        encoding="utf-8"
+    bench = tmp_path / "bench"
+    bench.mkdir()
+    (bench / "bench.local.toml").write_text(
+        f'schema_version="bench.v1"\\n[results]\\nroot="{tmp_path.as_posix()}"\\n',
+        encoding="utf-8",
     )
     rc = _run_pytaf_run(tmp_path)
-    assert rc in (0,1,24)
+    assert rc in (0, 1, 24)
 
     run_dirs = [p for p in tmp_path.glob("run_*") if p.is_dir()]
     assert run_dirs, "no run dir created"

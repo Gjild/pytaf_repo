@@ -1,6 +1,8 @@
 from __future__ import annotations
+
 import os
 from pathlib import Path
+
 
 def is_cloudy_path(path: Path) -> bool:
     s = str(path).lower()
@@ -18,11 +20,13 @@ def ensure_local_results_root(path: Path) -> tuple[Path, bool, Path, bool]:
         if cloud:
             relto = Path(os.environ.get("PROGRAMDATA", r"C:\ProgramData")) / "PyTAF" / "cache"
             relto.mkdir(parents=True, exist_ok=True)
-            p = relto; relocated = True
+            p = relto
+            relocated = True
     else:
         if cloud:
             relto = Path(os.environ.get("XDG_DATA_HOME", Path.home() / ".local/share")) / "pytaf"
             relto.mkdir(parents=True, exist_ok=True)
-            p = relto; relocated = True
+            p = relto
+            relocated = True
     p.mkdir(parents=True, exist_ok=True)
     return p, relocated, relto, cloud

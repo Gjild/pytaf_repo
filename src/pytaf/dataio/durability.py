@@ -1,21 +1,25 @@
 from __future__ import annotations
+
+from collections.abc import Generator
+from contextlib import contextmanager, suppress
 import os
-from contextlib import contextmanager
 from pathlib import Path
+from typing import IO, Any
+
 
 @contextmanager
-def atomic_open(path: Path, mode="wb"):
+def atomic_open(path: Path, mode: str = "wb") -> Generator[IO[Any], None, None]:
     tmp = path.with_suffix(path.suffix + ".tmp")
-    f = open(tmp, mode)
     try:
-        yield f
-        f.flush(); os.fsync(f.fileno())
+        with open(tmp, mode) as f:
+            yield f
+            f.flush()
+            os.fsync(f.fileno())
         os.replace(tmp, path)
-        try:
+        with suppress(Exception):
             dirfd = os.open(os.fspath(path.parent), os.O_DIRECTORY)
-            os.fsync(dirfd); os.close(dirfd)
-        except Exception:
-            pass
+            os.fsync(dirfd)
+            os.close(dirfd)
     finally:
-        try: tmp.unlink(missing_ok=True)
-        except Exception: pass
+        with suppress(Exception):
+            tmp.unlink(missing_ok=True)

@@ -1,5 +1,8 @@
 from __future__ import annotations
+
 from pathlib import Path
+from typing import Annotated
+
 import typer
 
 app = typer.Typer(add_completion=False)
@@ -14,12 +17,10 @@ _TEMPLATE = (
 
 @app.callback(invoke_without_command=True)
 def init_root(
-    non_interactive: bool = typer.Option(
-        False, "--non-interactive", help="Write defaults without prompts"
-    ),
-    bench_dir: Path = typer.Option(
-        Path("bench"), "--bench-dir", help="Directory to create bench files"
-    ),
+    non_interactive: Annotated[
+        bool, typer.Option("--non-interactive", help="Write defaults without prompts")
+    ] = False,
+    bench_dir: Annotated[Path, typer.Option("--bench-dir", help="Directory to create bench files")] = Path("bench"),
 ) -> None:
     """
     Initialize a bench directory with a minimal local config.

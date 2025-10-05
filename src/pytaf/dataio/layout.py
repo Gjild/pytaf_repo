@@ -1,8 +1,12 @@
 from __future__ import annotations
+
+import hashlib
+import json
 from pathlib import Path
-import hashlib, json
-from .win_durability import flush_dir_anchor_if_windows
+
 from .durability import atomic_open
+from .win_durability import flush_dir_anchor_if_windows
+
 
 def _sha256(p: Path) -> str:
     h = hashlib.sha256()

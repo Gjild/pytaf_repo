@@ -1,8 +1,9 @@
 from __future__ import annotations
-from pathlib import Path
-from typing import List
 
-def scan_stale_tmps(root: Path) -> List[Path]:
+from pathlib import Path
+
+
+def scan_stale_tmps(root: Path) -> list[Path]:
     """
     Shallow sweeps of root + common Phase 1 subdirs.
     """

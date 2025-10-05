@@ -1,14 +1,21 @@
 from __future__ import annotations
-import os, signal, time, sys, select
+
+from contextlib import suppress
 from dataclasses import dataclass
-from typing import Dict, Optional, Literal
-from pytaf.broker import ipc, epochs
+import os
+import select
+import signal
+import time
+from typing import Any, Literal
+
+from pytaf.broker import epochs, ipc
 from pytaf.broker.lanes import DualLaneQueue
-from pytaf.transport.echo import EchoTransport, EchoConfig
+from pytaf.transport.echo import EchoConfig, EchoTransport
 from pytaf.transport.spi import Budgets
 from pytaf.util.lockfile import BrokerLock
 
-Lane = Literal["control","bulk"]
+Lane = Literal["control", "bulk"]
+
 
 @dataclass
 class Session:
@@ -17,6 +24,7 @@ class Session:
     xport: EchoTransport
     control_burst: int = 0
 
+
 def _env_int(name: str, default: int, lo: int, hi: int) -> int:
     try:
         v = int(os.environ.get(name, str(default)))
@@ -24,15 +32,16 @@ def _env_int(name: str, default: int, lo: int, hi: int) -> int:
     except Exception:
         return default
 
+
 class Broker:
     def __init__(self, r_fd: int, w_fd: int, epoch: epochs.Epoch):
         self._r, self._w = r_fd, w_fd
         self._epoch = epoch
-        self._sessions: Dict[str, Session] = {}
+        self._sessions: dict[str, Session] = {}
         self._running = True
-        self._bulk_chunk = _env_int("PYTAF_BULK_CHUNK", 16384, 512, 1<<20)
+        self._bulk_chunk = _env_int("PYTAF_BULK_CHUNK", 16384, 512, 1 << 20)
         self._peek_handle = None
-        self._bulk_state: Dict[str, dict] = {}
+        self._bulk_state: dict[str, dict[str, Any]] = {}
         self._set_nonblocking(self._r)
         self._fair_burst_limit = _env_int("PYTAF_CONTROL_BURST_LIMIT", 8, 1, 256)
         # Lockfile for kill safety
@@ -47,12 +56,14 @@ class Broker:
     def _set_nonblocking(self, fd: int) -> None:
         if os.name != "nt":
             import fcntl
+
             flags = fcntl.fcntl(fd, fcntl.F_GETFL)
             fcntl.fcntl(fd, fcntl.F_SETFL, flags | os.O_NONBLOCK)
         else:
             try:
                 import msvcrt
-                self._peek_handle = msvcrt.get_osfhandle(fd)
+
+                self._peek_handle = msvcrt.get_osfhandle(fd)  # type: ignore[attr-defined]
             except Exception:
                 self._peek_handle = None
 
@@ -68,16 +79,16 @@ class Broker:
             if self._peek_handle is None:
                 return False
             try:
-                import ctypes as c, ctypes.wintypes as w
+                import ctypes as c
+                import ctypes.wintypes as w
+
                 ERROR_BROKEN_PIPE = 109
                 avail = w.DWORD()
                 ok = c.windll.kernel32.PeekNamedPipe(self._peek_handle, None, 0, None, c.byref(avail), None)
                 if not ok:
                     err = c.GetLastError()
-                    if err == ERROR_BROKEN_PIPE:
-                        # Treat as readable so read_msg raises EOFError → clean exit
-                        return True
-                    return False
+                    # Treat as readable so read_msg raises EOFError → clean exit
+                    return err == ERROR_BROKEN_PIPE
                 return avail.value > 0
             except Exception:
                 return False
@@ -85,30 +96,41 @@ class Broker:
     # session helpers
     def _ensure(self, uri: str) -> Session:
         s = self._sessions.get(uri)
-        if s: return s
-        sess = Session(uri=uri, lanes=DualLaneQueue(),
-                       xport=EchoTransport(uri, EchoConfig()))
+        if s:
+            return s
+        sess = Session(uri=uri, lanes=DualLaneQueue(), xport=EchoTransport(uri, EchoConfig()))
         sess.xport.open()
         self._sessions[uri] = sess
         return sess
 
-    def _ack(self, ok: bool, op_id: int, payload: Optional[bytes] = None,
-             diag: Optional[dict] = None, error: Optional[str] = None) -> None:
-        d = {"lock_was_held": bool(self._lock_was_held)}
-        if diag: d.update(diag)
-        ipc.write_msg(self._w, {
-            "ok": ok,
-            "op_id": op_id,
-            "epoch_id": self._epoch.id,
-            "ipc_version": ipc.VERSION,
-            "payload": payload,
-            "diag": d,
-            "error": error,
-        })
+    def _ack(
+        self,
+        ok: bool,
+        op_id: int,
+        payload: bytes | None = None,
+        diag: dict[str, Any] | None = None,
+        error: str | None = None,
+    ) -> None:
+        d: dict[str, Any] = {"lock_was_held": bool(self._lock_was_held)}
+        if diag:
+            d.update(diag)
+        ipc.write_msg(
+            self._w,
+            {
+                "ok": ok,
+                "op_id": op_id,
+                "epoch_id": self._epoch.id,
+                "ipc_version": ipc.VERSION,
+                "payload": payload,
+                "diag": d,
+                "error": error,
+            },
+        )
 
     # IPC dispatch
-    def _dispatch_ipc(self, msg: dict) -> None:
-        op = msg.get("op"); op_id = msg.get("op_id", 0)
+    def _dispatch_ipc(self, msg: dict[str, Any]) -> None:
+        op = msg.get("op")
+        op_id = msg.get("op_id", 0)
         if op == "open":
             uri = msg["resource"]
             self._ensure(uri)
@@ -117,12 +139,13 @@ class Broker:
             uri = msg["resource"]
             sess = self._sessions.pop(uri, None)
             if sess:
-                try: sess.xport.close()
-                except Exception: pass
+                with suppress(Exception):
+                    sess.xport.close()
             self._bulk_state.pop(uri, None)
             self._ack(True, op_id)
         elif op == "xact":
-            uri = msg["resource"]; lane = msg.get("lane") or "control"
+            uri = msg["resource"]
+            lane = msg.get("lane") or "control"
             tx: bytes = msg.get("payload") or b""
             sess = self._ensure(uri)
             if lane == "control":
@@ -150,13 +173,15 @@ class Broker:
         return True
 
     # bulk chunking with preemption point
-    def _advance_bulk_tick(self, uri: str, sess: Session, st: dict) -> None:
-        tx: bytes = st["tx"]; ofs: int = st["ofs"]; size = len(tx)
+    def _advance_bulk_tick(self, uri: str, sess: Session, st: dict[str, Any]) -> None:
+        tx: bytes = st["tx"]
+        ofs: int = st["ofs"]
+        size = len(tx)
         if ofs >= size:
             return
         chunk = max(1, min(self._bulk_chunk, size - ofs))
         budgets = Budgets(write_ms=0, complete_ms=0, read_ms=0, total_ms=0)
-        rx = sess.xport.transact(tx[ofs:ofs+chunk], budgets=budgets)
+        rx = sess.xport.transact(tx[ofs : ofs + chunk], budgets=budgets)
         st["ofs"] = ofs + chunk
         # preemption point
         self._service_control_if_any(sess)
@@ -194,11 +219,12 @@ class Broker:
 
         # teardown
         for s in list(self._sessions.values()):
-            try: s.xport.close()
-            except Exception: pass
+            with suppress(Exception):
+                s.xport.close()
         if self._lock:
             self._lock.release()
         return 0
+
 
 def main_broker(r_fd: int, w_fd: int) -> int:
     ep = epochs.new_epoch()

@@ -1,6 +1,9 @@
 from __future__ import annotations
+
 from dataclasses import dataclass
-import secrets, time
+import secrets
+import time
+
 
 @dataclass(frozen=True)
 class Epoch:

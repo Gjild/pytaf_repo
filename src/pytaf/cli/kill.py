@@ -1,7 +1,9 @@
 from __future__ import annotations
+
 import os
-import signal
 from pathlib import Path
+import signal
+from typing import Annotated
 
 import typer
 
@@ -17,12 +19,7 @@ def _find_last_run(root: Path) -> Path | None:
 
 def _looks_like_broker_linux(pid: int) -> bool:
     try:
-        cmdline = (
-            Path(f"/proc/{pid}/cmdline")
-            .read_bytes()
-            .replace(b"\x00", b" ")
-            .decode("utf-8", "replace")
-        )
+        cmdline = Path(f"/proc/{pid}/cmdline").read_bytes().replace(b"\x00", b" ").decode("utf-8", "replace")
         return "-m pytaf.broker" in cmdline
     except Exception:
         return False
@@ -34,20 +31,18 @@ def _looks_like_broker_windows(pid: int) -> bool:
         import ctypes.wintypes as w
 
         PROCESS_QUERY_LIMITED_INFORMATION = 0x1000
-        h = c.windll.kernel32.OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, False, pid)
+        h = c.windll.kernel32.OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, False, pid)  # type: ignore[attr-defined]
         if not h:
             return False
         try:
             size = w.DWORD(32767)
             buf = c.create_unicode_buffer(size.value)
-            if not c.windll.kernel32.QueryFullProcessImageNameW(h, 0, buf, c.byref(size)):
+            if not c.windll.kernel32.QueryFullProcessImageNameW(h, 0, buf, c.byref(size)):  # type: ignore[attr-defined]
                 return False
             exe = buf.value.lower()
-            if not (exe.endswith("\\python.exe") or exe.endswith("\\pythonw.exe")):
-                return False
-            return True
+            return exe.endswith(("\\python.exe", "\\pythonw.exe"))
         finally:
-            c.windll.kernel32.CloseHandle(h)
+            c.windll.kernel32.CloseHandle(h)  # type: ignore[attr-defined]
     except Exception:
         return False
 
@@ -62,11 +57,13 @@ def _send_ctrl_break_windows(pid: int) -> bool:
 
 @app.callback(invoke_without_command=True)
 def kill_root(
-    run_dir: Path = typer.Option(
-        None, "--run-dir", dir_okay=True, file_okay=False, exists=False
-    ),
-    bench: Path = typer.Option(None, "--bench", help="Bench TOML to resolve results root for --last-run"),
-    last_run: bool = typer.Option(False, "--last-run", help="Target the most recent run_* in results root"),
+    run_dir: Annotated[
+        Path | None, typer.Option("--run-dir", dir_okay=True, file_okay=False, exists=False)
+    ] = None,
+    bench: Annotated[
+        Path | None, typer.Option("--bench", help="Bench TOML to resolve results root for --last-run")
+    ] = None,
+    last_run: Annotated[bool, typer.Option("--last-run", help="Target the most recent run_* in results root")] = False,
 ) -> None:
     target: Path | None = None
     if run_dir:
@@ -82,15 +79,13 @@ def kill_root(
                 cfg = tomllib.load(f)
         except Exception as e:
             typer.echo(f"ConfigError(22): {e}")
-            raise typer.Exit(22)
+            raise typer.Exit(22) from e
         if "results" not in cfg or "root" not in cfg["results"]:
-            typer.echo('ConfigError(22): missing [results].root')
+            typer.echo("ConfigError(22): missing [results].root")
             raise typer.Exit(22)
         base = bench.parent.resolve()
         declared_root = Path(cfg["results"]["root"])
-        results_root = (
-            declared_root if declared_root.is_absolute() else (base / declared_root)
-        ).resolve()
+        results_root = (declared_root if declared_root.is_absolute() else (base / declared_root)).resolve()
         target = _find_last_run(results_root)
         if not target:
             typer.echo("AbortBySignal(31): No runs found")
@@ -110,7 +105,7 @@ def kill_root(
             pid_val = int(pidf.read_text("utf-8").strip())
         except Exception as e:
             typer.echo(f"ConfigError(22): Bad pidfile: {e}")
-            raise typer.Exit(22)
+            raise typer.Exit(22) from e
     else:
         man = target / "manifest.v1.json"
         if man.exists():
@@ -127,16 +122,12 @@ def kill_root(
 
     lock_path = target / "broker.lock"
     if try_nonblocking_exclusive_lock(lock_path):
-        typer.echo(
-            f"RefusedByPolicy(34): Broker lock not held; refusing to signal. Lock checked at {lock_path}"
-        )
+        typer.echo(f"RefusedByPolicy(34): Broker lock not held; refusing to signal. Lock checked at {lock_path}")
         raise typer.Exit(34)
 
     looks_ok = _looks_like_broker_windows(pid_val) if os.name == "nt" else _looks_like_broker_linux(pid_val)
     if not looks_ok:
-        typer.echo(
-            f"Warning: PID {pid_val} did not match broker heuristic; proceeding due to valid lock {lock_path}."
-        )
+        typer.echo(f"Warning: PID {pid_val} did not match broker heuristic; proceeding due to valid lock {lock_path}.")
 
     try:
         if os.name == "nt":
@@ -149,7 +140,7 @@ def kill_root(
             typer.echo(f"Sent TERM to broker pid {pid_val}")
     except Exception as e:
         typer.echo(f"TransportError(23): {e}")
-        raise typer.Exit(23)
+        raise typer.Exit(23) from e
 
 
 if __name__ == "__main__":

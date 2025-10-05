@@ -1,16 +1,14 @@
 from __future__ import annotations
+
 import typer
+
+from pytaf.cli import init as init_mod, kill as kill_mod, run as run_mod, version as version_mod
 
 app = typer.Typer(no_args_is_help=True, add_completion=False)
 
 @app.callback()
 def _root() -> None:
     return None
-
-from pytaf.cli import init as init_mod
-from pytaf.cli import run as run_mod
-from pytaf.cli import kill as kill_mod
-from pytaf.cli import version as version_mod
 
 app.add_typer(init_mod.app, name="init")
 app.add_typer(run_mod.app, name="run")

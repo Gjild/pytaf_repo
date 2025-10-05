@@ -1,5 +1,7 @@
-import sys, subprocess
 from pathlib import Path
+import subprocess
+import sys
+
 
 def test_init_non_interactive(tmp_path: Path):
     rc = subprocess.run(

@@ -1,8 +1,10 @@
 from __future__ import annotations
+
+from dataclasses import dataclass
 import os
 import time
-from dataclasses import dataclass
-from .spi import Transport, Budgets, TransportDiag
+
+from .spi import Budgets, Transport, TransportDiag
 
 
 def _env_int(name: str, default: int, lo: int, hi: int) -> int:
@@ -27,6 +29,7 @@ class EchoConfig:
     Internal/compat:
       - size_kib_cap:          legacy latency scaling cap used by broker tests
     """
+
     # Base latency to simulate work per call
     latency_ms: int = 1
     # Optional fragmentation/trailer knobs (phase-1 tests don't deeply assert these)
@@ -37,12 +40,6 @@ class EchoConfig:
     # Legacy cap (kept for env overrides), not strictly required by tests
     size_kib_cap: int = 100
 
-def _env_int(name: str, default: int, lo: int, hi: int) -> int:
-    try:
-        v = int(os.environ.get(name, str(default)))
-        return max(lo, min(v, hi))
-    except Exception:
-        return default
 
 class EchoTransport(Transport):
     """
@@ -51,10 +48,11 @@ class EchoTransport(Transport):
       - optional simulated abort via rst_after_bytes -> raises ConnectionError
       - simple latency per call
     """
+
     def __init__(self, uri: str, cfg: EchoConfig | None = None):
         self._uri = uri
         base = _env_int("PYTAF_ECHO_BASE_LAT_MS", 1, 0, 1000)
-        cap  = _env_int("PYTAF_ECHO_SIZE_KIB_CAP", 100, 1, 10000)
+        cap = _env_int("PYTAF_ECHO_SIZE_KIB_CAP", 100, 1, 10000)
         self._cfg = cfg or EchoConfig(latency_ms=base, size_kib_cap=cap)
         self._diag = TransportDiag()
         self._is_open = False
